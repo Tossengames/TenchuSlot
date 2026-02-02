@@ -2,7 +2,7 @@
 const SYMBOLS = 6;
 const EMOJIS = ['🥷', '🗡️', '🏮', '👺', '📜', '🏯'];
 
-let coins = 50;
+let coins = 10;
 let highScore = 0;
 let isSpinning = [false, false, false];
 let grid = [[], [], []];
