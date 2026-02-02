@@ -1,10 +1,14 @@
+// --- CONFIGURATION ---
+const TEST_MODE = true; // Set to FALSE before publishing to GitHub
 const SYMBOLS = 6;
 const EMOJIS = ['🥷', '🗡️', '🏮', '👺', '📜', '🏯'];
+
 let coins = 50;
 let isSpinning = [false, false, false];
 let grid = [[], [], []];
 let busy = false;
 
+// --- SOUND ENGINE ---
 function playSnd(id) {
     const s = document.getElementById('snd-' + id);
     if (s) {
@@ -18,6 +22,7 @@ function stopLoopSnd(id) {
     if (s) s.pause();
 }
 
+// --- NAVIGATION ---
 function startGame() {
     document.getElementById('main-menu').classList.add('hidden');
     document.getElementById('game-view').classList.remove('hidden');
@@ -28,6 +33,7 @@ function toggleInfo() {
     document.getElementById('info-screen').classList.toggle('hidden');
 }
 
+// --- ENGINE ---
 function initMachine() {
     for (let i = 0; i < 3; i++) {
         const strip = document.getElementById(`strip-${i}`);
@@ -49,12 +55,16 @@ function createSym(id) {
 function startSpin() {
     if (coins < 5 || busy) return;
     busy = true;
+    
+    // Hide spin button and results
+    document.getElementById('spin-btn').classList.add('hidden-btn');
+    document.getElementById('result-panel').classList.add('hidden');
+    
+    // Clean old state
+    document.querySelectorAll('.symbol').forEach(s => s.classList.remove('winning-symbol'));
+    
     coins -= 5;
     updateUI();
-    
-    document.getElementById('spin-btn').classList.add('hidden-btn'); // Hide spin button
-    document.getElementById('result-panel').classList.add('hidden');
-    document.querySelectorAll('.symbol').forEach(s => s.classList.remove('winning-symbol'));
 
     playSnd('spin-start');
     playSnd('spinning');
@@ -69,10 +79,21 @@ function stopReel(i) {
     if (!isSpinning[i]) return;
     playSnd('stop');
     isSpinning[i] = false;
+    
     const strip = document.getElementById(`strip-${i}`);
     strip.classList.remove('spinning');
     
-    grid[i] = [Math.floor(Math.random()*SYMBOLS)+1, Math.floor(Math.random()*SYMBOLS)+1, Math.floor(Math.random()*SYMBOLS)+1];
+    // TEST MODE LOGIC: Force Symbol 6 for all spots
+    if (TEST_MODE) {
+        grid[i] = [6, 6, 6];
+    } else {
+        grid[i] = [
+            Math.floor(Math.random()*SYMBOLS)+1,
+            Math.floor(Math.random()*SYMBOLS)+1,
+            Math.floor(Math.random()*SYMBOLS)+1
+        ];
+    }
+
     strip.innerHTML = '';
     grid[i].forEach(id => strip.appendChild(createSym(id)));
 
@@ -84,23 +105,23 @@ function stopReel(i) {
 
 function checkResult() {
     let lines = [];
-    const g = grid; // g[reel][row]
+    const g = grid; 
 
-    // 1. Check Horizontal Rows
+    // 1. Horizontal Rows
     for (let r = 0; r < 3; r++) {
         if (g[0][r] === g[1][r] && g[1][r] === g[2][r]) {
             lines.push({type:'h', v:r, id:g[0][r]});
         }
     }
 
-    // 2. Check Vertical Columns
+    // 2. Vertical Columns (Fixed Logic)
     for (let c = 0; c < 3; c++) {
         if (g[c][0] === g[c][1] && g[c][1] === g[c][2]) {
             lines.push({type:'v', v:c, id:g[c][0]});
         }
     }
 
-    // 3. Check Diagonals
+    // 3. Diagonals
     if (g[0][0] === g[1][1] && g[1][1] === g[2][2]) lines.push({type:'d', v:0, id:g[1][1]});
     if (g[0][2] === g[1][1] && g[1][1] === g[2][0]) lines.push({type:'d', v:1, id:g[1][1]});
 
@@ -138,27 +159,32 @@ function finalize(lines) {
         playSnd('lose');
     }
 
+    // Handle Game Over
     if (coins < 5 && lines.length === 0) {
-        type.innerText = "GAME OVER";
-        cash.innerText = "No gold remains.";
+        setTimeout(() => {
+            type.innerText = "TOTAL DEFEAT";
+            cash.innerText = "Press QUIT to Restart";
+        }, 1000);
     }
 
     setTimeout(() => {
         busy = false;
-        if (coins >= 5) document.getElementById('spin-btn').classList.remove('hidden-btn');
-    }, 2000);
+        if (coins >= 5) {
+            document.getElementById('spin-btn').classList.remove('hidden-btn');
+        }
+    }, 2500);
 }
 
 function highlight(l) {
     for (let i = 0; i < 3; i++) {
-        let el;
-        if (l.type === 'h') el = document.getElementById(`strip-${i}`).children[l.v];
-        if (l.type === 'v') el = document.getElementById(`strip-${l.v}`).children[i];
+        let target;
+        if (l.type === 'h') target = document.getElementById(`strip-${i}`).children[l.v];
+        if (l.type === 'v') target = document.getElementById(`strip-${l.v}`).children[i];
         if (l.type === 'd') {
-            let r = (l.v === 0 ? i : 2 - i);
-            el = document.getElementById(`strip-${i}`).children[r];
+            let row = (l.v === 0 ? i : 2 - i);
+            target = document.getElementById(`strip-${i}`).children[row];
         }
-        if (el) el.classList.add('winning-symbol');
+        if (target) target.classList.add('winning-symbol');
     }
 }
 
@@ -172,7 +198,9 @@ function animateCoins(amount) {
     }, 30);
 }
 
-function updateUI() { document.getElementById('coins').innerText = coins; }
+function updateUI() { 
+    document.getElementById('coins').innerText = coins; 
+}
 
 function shareGame() {
     const text = `I have ${coins} gold in Shinobi Strike!`;
