@@ -3,7 +3,7 @@ const SYMBOLS = 6;
 const EMOJIS = ['🥷', '🗡️', '🏮', '👺', '📜', '🏯'];
 const SYMBOL_NAMES = ['Rikimaru', 'Kodachi', 'Lantern', 'Oni Guard', 'Secret Scroll', 'Castle Lord'];
 
-// Character missions
+// Character mission
 const MISSIONS = {
     rikimaru: {
         name: "Rikimaru",
