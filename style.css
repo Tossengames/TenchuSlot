@@ -1,0 +1,124 @@
+:root {
+    --gold: #d4af37;
+    --blood-red: #8b0000;
+    --dark-wood: #1a1a1a;
+}
+
+body {
+    background-color: #050505;
+    color: #eee;
+    font-family: 'Courier New', Courier, monospace;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    overflow: hidden;
+    touch-action: manipulation;
+}
+
+.game-container {
+    text-align: center;
+    width: 95%;
+    max-width: 450px;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    padding: 10px;
+    border: 1px solid var(--blood-red);
+    background: rgba(139, 0, 0, 0.1);
+}
+
+.stat-box {
+    font-size: 1.1rem;
+    color: var(--gold);
+    text-shadow: 1px 1px #000;
+}
+
+.slot-machine {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    background: var(--dark-wood);
+    padding: 15px;
+    border: 5px solid #333;
+    border-radius: 4px;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 1), 0 0 15px var(--blood-red);
+}
+
+.reel {
+    width: 100px;
+    height: 300px; /* Shows 3 symbols */
+    background: #000;
+    border: 1px solid #444;
+    overflow: hidden;
+    position: relative;
+    cursor: pointer;
+}
+
+.strip {
+    position: absolute;
+    width: 100%;
+    transition: transform 0.1s ease-out;
+}
+
+.symbol {
+    width: 100px;
+    height: 100px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2.5rem;
+    border-bottom: 1px solid #222;
+}
+
+.symbol img {
+    width: 80%;
+    height: 80%;
+    object-fit: contain;
+}
+
+.spinning {
+    animation: scroll 0.15s linear infinite;
+    filter: blur(3px) grayscale(0.5);
+}
+
+@keyframes scroll {
+    from { transform: translateY(0); }
+    to { transform: translateY(-300px); }
+}
+
+button {
+    margin-top: 25px;
+    width: 100%;
+    padding: 15px;
+    background: var(--blood-red);
+    color: white;
+    border: 2px solid var(--gold);
+    font-size: 1.3rem;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 4px 0 #500;
+}
+
+button:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 0 #500;
+}
+
+button:disabled {
+    background: #333;
+    border-color: #555;
+    color: #777;
+    box-shadow: none;
+}
+
+#message {
+    margin-top: 15px;
+    color: var(--gold);
+    font-weight: bold;
+    text-transform: uppercase;
+}
