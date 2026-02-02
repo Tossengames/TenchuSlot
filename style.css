@@ -8,73 +8,65 @@ body {
     background-color: #000;
     color: #fff;
     margin: 0;
-    font-family: 'Segoe UI', Roboto, Helvetica, sans-serif;
+    font-family: 'Segoe UI', sans-serif;
     overflow: hidden;
-    height: 100vh;
 }
 
 .screen {
     position: absolute;
     width: 100%; height: 100%;
     display: flex; flex-direction: column;
-    justify-content: center; align-items: center;
+    justify-content: center; align-items: center; /* Centering fix */
     background: radial-gradient(circle, #1a0000 0%, #000 100%);
+    text-align: center;
+}
+
+.menu-btns {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center the buttons */
+    width: 100%;
 }
 
 .hidden { display: none !important; }
 
-/* TITLES */
-.glitch-title {
-    font-size: 4rem;
-    text-align: center;
-    color: var(--blood);
-    text-shadow: 0 0 10px var(--blood), 2px 2px #fff;
-    animation: glow 2s infinite alternate;
+/* FEEDBACK PANEL FIX */
+#result-panel {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.9); z-index: 10;
+    display: flex; flex-direction: column; 
+    justify-content: center; align-items: center; /* Vertical and horizontal center */
+    padding: 10px; box-sizing: border-box;
 }
 
-@keyframes glow {
-    from { text-shadow: 0 0 10px var(--blood); }
-    to { text-shadow: 0 0 30px var(--blood), 0 0 10px #fff; }
+#res-type { 
+    color: var(--gold); 
+    font-size: 1.8rem; 
+    margin: 10px 0; 
+    width: 90%; /* Prevent text hitting edges */
+    word-wrap: break-word;
 }
 
-/* UI ELEMENTS */
-.slot-machine {
-    display: flex; gap: 5px; background: #222;
-    padding: 10px; border: 3px solid #444; position: relative;
+/* BUTTONS */
+button {
+    background: var(--blood); color: #fff; border: 1px solid var(--gold);
+    padding: 15px 40px; font-weight: bold; margin: 10px;
+    width: 250px; /* Fixed width for menu buttons */
+    border-radius: 5px; cursor: pointer;
 }
 
-.reel {
-    width: 28vw; max-width: 100px; height: 300px;
-    background: #000; overflow: hidden; position: relative;
-    border: 1px solid #333;
-}
+#spin-btn { width: 80%; max-width: 300px; }
+.hidden-btn { visibility: hidden; opacity: 0; }
 
+.mini-btn { width: auto; padding: 5px 15px; font-size: 0.8rem; background: #222; }
+
+/* REELS */
+.slot-machine { display: flex; gap: 5px; background: #222; padding: 10px; border: 3px solid #444; position: relative; }
+.reel { width: 28vw; max-width: 100px; height: 300px; background: #000; overflow: hidden; position: relative; border: 1px solid #333; }
 .strip { position: absolute; width: 100%; }
 .symbol { width: 100%; height: 100px; display: flex; justify-content: center; align-items: center; font-size: 2.5rem; }
 .symbol img { width: 80%; height: 80%; object-fit: contain; }
 
-/* FEEDBACK PANEL */
-#result-panel {
-    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.85); z-index: 10;
-    display: flex; flex-direction: column; justify-content: center; align-items: center;
-}
-
-#res-type { color: var(--gold); margin: 0; font-size: 2rem; }
-#res-coins { color: #fff; margin: 5px; }
-
-/* BUTTONS */
-button {
-    background: var(--blood); color: #fff; border: none;
-    padding: 15px 40px; font-weight: bold; margin: 10px;
-    border-radius: 5px; cursor: pointer; transition: 0.2s;
-}
-
-button:active { transform: scale(0.95); }
-.mini-btn { padding: 5px 15px; font-size: 0.8rem; background: #333; }
-
-/* ANIMATIONS */
 .spinning { animation: scroll 0.1s linear infinite; filter: blur(4px); }
 @keyframes scroll { from { transform: translateY(0); } to { transform: translateY(-300px); } }
-
 .winning-symbol { box-shadow: inset 0 0 20px var(--gold); border: 2px solid var(--gold); }
