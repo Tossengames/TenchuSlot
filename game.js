@@ -1,5 +1,4 @@
 // --- CONFIGURATION ---
-const TEST_MODE = true; // Set to FALSE before publishing to GitHub
 const SYMBOLS = 6;
 const EMOJIS = ['🥷', '🗡️', '🏮', '👺', '📜', '🏯'];
 
@@ -33,13 +32,17 @@ function toggleInfo() {
     document.getElementById('info-screen').classList.toggle('hidden');
 }
 
-// --- ENGINE ---
+// --- CORE ENGINE ---
 function initMachine() {
     for (let i = 0; i < 3; i++) {
         const strip = document.getElementById(`strip-${i}`);
         strip.innerHTML = '';
-        for (let j = 0; j < 10; j++) strip.appendChild(createSym(Math.floor(Math.random()*SYMBOLS)+1));
+        // Initialize with random symbols
+        for (let j = 0; j < 3; j++) {
+            strip.appendChild(createSym(Math.floor(Math.random() * SYMBOLS) + 1));
+        }
     }
+    updateUI();
 }
 
 function createSym(id) {
@@ -47,7 +50,10 @@ function createSym(id) {
     d.className = 'symbol';
     const img = document.createElement('img');
     img.src = `images/${id}.png`;
-    img.onerror = () => { img.remove(); d.innerText = EMOJIS[id-1]; };
+    img.onerror = () => { 
+        img.remove(); 
+        d.innerText = EMOJIS[id - 1] || '🏮'; 
+    };
     d.appendChild(img);
     return d;
 }
@@ -56,11 +62,9 @@ function startSpin() {
     if (coins < 5 || busy) return;
     busy = true;
     
-    // Hide spin button and results
+    // UI Reset
     document.getElementById('spin-btn').classList.add('hidden-btn');
     document.getElementById('result-panel').classList.add('hidden');
-    
-    // Clean old state
     document.querySelectorAll('.symbol').forEach(s => s.classList.remove('winning-symbol'));
     
     coins -= 5;
@@ -83,16 +87,12 @@ function stopReel(i) {
     const strip = document.getElementById(`strip-${i}`);
     strip.classList.remove('spinning');
     
-    // TEST MODE LOGIC: Force Symbol 6 for all spots
-    if (TEST_MODE) {
-        grid[i] = [6, 6, 6];
-    } else {
-        grid[i] = [
-            Math.floor(Math.random()*SYMBOLS)+1,
-            Math.floor(Math.random()*SYMBOLS)+1,
-            Math.floor(Math.random()*SYMBOLS)+1
-        ];
-    }
+    // Random Generation for the 3x3 grid
+    grid[i] = [
+        Math.floor(Math.random() * SYMBOLS) + 1,
+        Math.floor(Math.random() * SYMBOLS) + 1,
+        Math.floor(Math.random() * SYMBOLS) + 1
+    ];
 
     strip.innerHTML = '';
     grid[i].forEach(id => strip.appendChild(createSym(id)));
@@ -107,18 +107,14 @@ function checkResult() {
     let lines = [];
     const g = grid; 
 
-    // 1. Horizontal Rows
+    // 1. Horizontal
     for (let r = 0; r < 3; r++) {
-        if (g[0][r] === g[1][r] && g[1][r] === g[2][r]) {
-            lines.push({type:'h', v:r, id:g[0][r]});
-        }
+        if (g[0][r] === g[1][r] && g[1][r] === g[2][r]) lines.push({type:'h', v:r, id:g[0][r]});
     }
 
-    // 2. Vertical Columns (Fixed Logic)
+    // 2. Vertical 
     for (let c = 0; c < 3; c++) {
-        if (g[c][0] === g[c][1] && g[c][1] === g[c][2]) {
-            lines.push({type:'v', v:c, id:g[c][0]});
-        }
+        if (g[c][0] === g[c][1] && g[c][1] === g[c][2]) lines.push({type:'v', v:c, id:g[c][0]});
     }
 
     // 3. Diagonals
@@ -138,6 +134,7 @@ function finalize(lines) {
     if (lines.length > 0) {
         let total = 0;
         lines.forEach(l => {
+            // Payout tiers: Symbol 6 is Jackpot, 4-5 are Elite, 1-3 are Common
             let pay = (l.id === 6) ? 500 : (l.id > 3 ? 150 : 50);
             total += pay;
             highlight(l);
@@ -159,19 +156,17 @@ function finalize(lines) {
         playSnd('lose');
     }
 
-    // Handle Game Over
+    // Check for Game Over
     if (coins < 5 && lines.length === 0) {
         setTimeout(() => {
             type.innerText = "TOTAL DEFEAT";
-            cash.innerText = "Press QUIT to Restart";
+            cash.innerText = "Mission Failed. Quit to retry.";
         }, 1000);
     }
 
     setTimeout(() => {
         busy = false;
-        if (coins >= 5) {
-            document.getElementById('spin-btn').classList.remove('hidden-btn');
-        }
+        if (coins >= 5) document.getElementById('spin-btn').classList.remove('hidden-btn');
     }, 2500);
 }
 
@@ -203,6 +198,10 @@ function updateUI() {
 }
 
 function shareGame() {
-    const text = `I have ${coins} gold in Shinobi Strike!`;
+    const text = `I am a Master Ninja with ${coins} gold in Shinobi Strike!`;
     window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`);
 }
+
+window.onload = () => {
+    // Machine initialized via startGame
+};
