@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TENCHU: Shadow Mission</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🥷</text></svg>">
+</head>
+<body>
+
+    <!-- Main Menu -->
+    <div id="main-menu" class="screen">
+        <h1 class="glitch-title">TENCHU<br>SHADOW MISSION</h1>
+        <div class="menu-btns">
+            <button onclick="startMission()">ACCEPT MISSION</button>
+            <button onclick="showInstructions()">SCROLL OF TRUTHS</button>
+            <button onclick="showMissionSelect()">CHOOSE SHINOBI</button>
+            <button class="share-btn" onclick="shareGame()">SHARE HONOR</button>
+            <button class="donate-btn" onclick="donate()">SUPPORT THE CLAN</button>
+        </div>
+        <div class="rank-display" id="rank-display">
+            <div class="rank-name" id="current-rank">Initiate</div>
+            <div class="rank-progress">
+                <div class="rank-progress-bar" id="rank-progress-bar"></div>
+            </div>
+            <div style="font-size: 0.8rem; margin-top: 5px;">Honor: <span id="total-honor">0</span></div>
+        </div>
+    </div>
+
+    <!-- Mission Select -->
+    <div id="mission-select" class="screen hidden">
+        <div class="mission-screen">
+            <h2 class="mission-title">CHOOSE YOUR SHINOBI</h2>
+            
+            <div class="mission-character" onclick="selectCharacter('rikimaru')">
+                <div class="character-portrait rikimaru-color">🥷</div>
+                <div class="character-info">
+                    <div class="character-name">RIKIMARU</div>
+                    <div class="character-quote">"The Azure Dragon seeks justice in the shadows..."</div>
+                </div>
+            </div>
+            
+            <div class="mission-character" onclick="selectCharacter('ayame')">
+                <div class="character-portrait ayame-color">⚔️</div>
+                <div class="character-info">
+                    <div class="character-name">AYAME</div>
+                    <div class="character-quote">"The Crimson Lily blooms where shadows fall..."</div>
+                </div>
+            </div>
+            
+            <div class="mission-character" onclick="selectCharacter('tatsumaru')">
+                <div class="character-portrait tatsumaru-color">👺</div>
+                <div class="character-info">
+                    <div class="character-name">TATSUMARU</div>
+                    <div class="character-quote">"The Green Viper strikes where least expected..."</div>
+                </div>
+            </div>
+            
+            <button onclick="startMission()">BEGIN MISSION</button>
+            <button class="mini-btn" onclick="goToMainMenu()">BACK</button>
+        </div>
+    </div>
+
+    <!-- Mission Briefing -->
+    <div id="mission-briefing" class="screen hidden">
+        <div class="mission-screen">
+            <h2 id="briefing-title" class="mission-title">MISSION BRIEFING</h2>
+            
+            <div id="character-display" class="mission-character">
+                <div class="character-portrait" id="character-portrait">🥷</div>
+                <div class="character-info">
+                    <div class="character-name" id="character-name">RIKIMARU</div>
+                    <div class="character-quote" id="character-quote"></div>
+                </div>
+            </div>
+            
+            <div class="mission-objective">
+                <div class="objective-title">🎯 PRIMARY OBJECTIVE</div>
+                <div class="objective-text" id="mission-text"></div>
+            </div>
+            
+            <div class="mission-rewards">
+                <div class="reward-item">
+                    <div class="reward-icon">💰</div>
+                    <div id="reward-gold">0 GOLD</div>
+                </div>
+                <div class="reward-item">
+                    <div class="reward-icon">⭐</div>
+                    <div id="reward-honor">0 HONOR</div>
+                </div>
+                <div class="reward-item">
+                    <div class="reward-icon">🏆</div>
+                    <div id="next-rank">NEXT RANK</div>
+                </div>
+            </div>
+            
+            <button onclick="startGame()">INFILTRATE</button>
+            <button class="mini-btn" onclick="goToMissionSelect()">DECLINE</button>
+        </div>
+    </div>
+
+    <!-- Instructions -->
+    <div id="info-screen" class="screen hidden">
+        <div class="mission-screen">
+            <h2 class="mission-title">SCROLL OF TRUTHS</h2>
+            
+            <div class="rules-content">
+                <h3>⚔️ MISSION PROTOCOL</h3>
+                <p><strong>1. INFILTRATION:</strong> Tap SPIN (5 Gold) to begin your mission. This represents gathering intelligence.</p>
+                <p><strong>2. STRIKE:</strong> Tap each reel to STOP in sequence. This represents eliminating targets.</p>
+                <p><strong>3. VICTORY CONDITIONS:</strong> Match 3 identical symbols in any direction to successfully complete an assassination.</p>
+                
+                <h3>🎖️ BOUNTY REWARDS</h3>
+                <p><strong>CHARACTER SYMBOLS (Higher Value):</strong></p>
+                <ul>
+                    <li>🥷 Ninja (Rikimaru): 30 Gold</li>
+                    <li>👺 Oni (Tatsumaru): 25 Gold</li>
+                    <li>🏯 Castle Lord: 50 Gold (Maximum)</li>
+                </ul>
+                
+                <p><strong>ITEM SYMBOLS (Standard Value):</strong></p>
+                <ul>
+                    <li>🗡️ Kodachi: 15 Gold</li>
+                    <li>🏮 Lantern: 10 Gold</li>
+                    <li>📜 Scroll: 8 Gold</li>
+                </ul>
+                
+                <p><strong>✨ MULTI-KILL BONUS:</strong> Multiple matches multiply your rewards by 1.3x!</p>
+                
+                <h3>📈 RANKING SYSTEM</h3>
+                <p>Complete missions to earn Honor Points and rise through the ranks:</p>
+                <ul>
+                    <li>0-100 Honor: Initiate</li>
+                    <li>101-300 Honor: Shinobi</li>
+                    <li>301-600 Honor: Assassin</li>
+                    <li>601-1000 Honor: Shadow Master</li>
+                    <li>1001+ Honor: Grand Master</li>
+                </ul>
+                
+                <h3>🎮 CHARACTER MISSIONS</h3>
+                <p>Each shinobi offers unique missions with specific objectives. Complete them to earn bonus honor and advance your rank.</p>
+                
+                <h3>💾 MISSION LOG</h3>
+                <p>Your progress, gold, and rank are saved automatically. You can continue your mission anytime.</p>
+                
+                <h3>💀 DEFEAT</h3>
+                <p>Running out of gold means mission failure. Return to base to regroup and choose a new mission.</p>
+            </div>
+            
+            <button onclick="goToMainMenu()">SEAL THE SCROLL</button>
+        </div>
+    </div>
+
+    <!-- Game View -->
+    <div id="game-view" class="screen hidden">
+        <div class="game-header">
+            <div class="stat">RYŌ: <span id="coins">50</span></div>
+            <div class="title-mini" id="mission-indicator">MISSION: RIKIMARU</div>
+            <div class="stat">HONOR: <span id="honor">0</span></div>
+        </div>
+
+        <div class="slot-machine" id="machine">
+            <div class="reel" id="reel-0" onclick="stopReel(0)"><div class="strip" id="strip-0"></div></div>
+            <div class="reel" id="reel-1" onclick="stopReel(1)"><div class="strip" id="strip-1"></div></div>
+            <div class="reel" id="reel-2" onclick="stopReel(2)"><div class="strip" id="strip-2"></div></div>
+            
+            <div id="result-panel" class="hidden">
+                <h2 id="res-type"></h2>
+                <h3 id="res-coins"></h3>
+                <div id="mission-update" style="font-size: 1rem; margin-top: 10px;"></div>
+            </div>
+        </div>
+
+        <div class="game-footer">
+            <button id="spin-btn" onclick="startSpin()">SPIN (5 RYŌ)</button>
+            <div class="footer-btns">
+                <button class="mini-btn" onclick="showInstructions()">RULES</button>
+                <button class="mini-btn donate-btn" onclick="donate()">DONATE</button>
+                <button class="mini-btn" onclick="returnToBase()">RETURN TO BASE</button>
+                <button class="mini-btn" onclick="saveGame()">SAVE</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mission Complete Overlay -->
+    <div id="mission-complete" class="mission-complete hidden">
+        <h2 style="color: #ffcc00; font-size: 3rem;">MISSION COMPLETE!</h2>
+        <div id="mission-result" style="font-size: 1.5rem; margin: 20px; text-align: center;"></div>
+        <div id="mission-reward" style="font-size: 2rem; color: #ffcc00; margin: 20px;"></div>
+        <button onclick="continueMission()">CONTINUE MISSION</button>
+        <button class="mini-btn" onclick="returnToBase()">RETURN TO BASE</button>
+    </div>
+
+    <!-- Particles Container -->
+    <div class="particles" id="particles"></div>
+
+    <script src="game.js"></script>
+</body>
+</html>
