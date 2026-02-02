@@ -1,9 +1,58 @@
-// --- CONFIGURATION ---
+// --- TENCHU CONFIGURATION ---
 const SYMBOLS = 6;
 const EMOJIS = ['🥷', '🗡️', '🏮', '👺', '📜', '🏯'];
+const SYMBOL_NAMES = ['Rikimaru', 'Kodachi', 'Lantern', 'Oni Guard', 'Secret Scroll', 'Castle Lord'];
 
-let coins = 10;
-let highScore = 0;
+// Character missions
+const MISSIONS = {
+    rikimaru: {
+        name: "Rikimaru",
+        color: "#3366cc",
+        quote: "The Azure Dragon seeks justice in the shadows...",
+        objectives: [
+            { target: 100, text: "Gather 100 gold for Lord Gohda's war chest.", reward: 50 },
+            { target: 200, text: "Secure 200 gold to fund the resistance against Lord Mei-Oh.", reward: 100 },
+            { target: 300, text: "Amass 300 gold to rebuild the Azuma village.", reward: 150 }
+        ]
+    },
+    ayame: {
+        name: "Ayame",
+        color: "#cc3366",
+        quote: "The Crimson Lily blooms where shadows fall...",
+        objectives: [
+            { target: 80, text: "Collect 80 gold for medicine to heal wounded shinobi.", reward: 40 },
+            { target: 150, text: "Gather 150 gold to purchase rare poison ingredients.", reward: 80 },
+            { target: 250, text: "Secure 250 gold to fund the rescue of captured kunoichi.", reward: 120 }
+        ]
+    },
+    tatsumaru: {
+        name: "Tatsumaru",
+        color: "#33cc66",
+        quote: "The Green Viper strikes where least expected...",
+        objectives: [
+            { target: 120, text: "Acquire 120 gold to bribe castle guards.", reward: 60 },
+            { target: 180, text: "Secure 180 gold for stealth gear and grappling hooks.", reward: 90 },
+            { target: 280, text: "Gather 280 gold to fund the rebellion against corrupt lords.", reward: 140 }
+        ]
+    }
+};
+
+// Ranks system
+const RANKS = [
+    { name: "Initiate", minHonor: 0, color: "#666666" },
+    { name: "Shinobi", minHonor: 100, color: "#3366cc" },
+    { name: "Assassin", minHonor: 300, color: "#cc3366" },
+    { name: "Shadow Master", minHonor: 600, color: "#9933cc" },
+    { name: "Grand Master", minHonor: 1000, color: "#ffcc00" }
+];
+
+let coins = 50;
+let honor = 0;
+let currentRank = 0;
+let currentMission = null;
+let currentCharacter = null;
+let currentObjective = 0;
+let missionsCompleted = 0;
 let isSpinning = [false, false, false];
 let grid = [[], [], []];
 let busy = false;
@@ -22,49 +71,153 @@ function stopLoopSnd(id) {
     if (s) s.pause();
 }
 
+// --- SAVE/LOAD SYSTEM ---
+function saveGame() {
+    localStorage.setItem('tenchu_coins', coins);
+    localStorage.setItem('tenchu_honor', honor);
+    localStorage.setItem('tenchu_missions', missionsCompleted);
+    localStorage.setItem('tenchu_character', currentCharacter || 'rikimaru');
+    localStorage.setItem('tenchu_objective', currentObjective);
+    updateRank();
+}
+
+function loadGame() {
+    const savedCoins = localStorage.getItem('tenchu_coins');
+    const savedHonor = localStorage.getItem('tenchu_honor');
+    const savedMissions = localStorage.getItem('tenchu_missions');
+    const savedChar = localStorage.getItem('tenchu_character');
+    const savedObj = localStorage.getItem('tenchu_objective');
+    
+    if (savedCoins) coins = parseInt(savedCoins);
+    if (savedHonor) honor = parseInt(savedHonor);
+    if (savedMissions) missionsCompleted = parseInt(savedMissions);
+    if (savedChar) currentCharacter = savedChar;
+    if (savedObj) currentObjective = parseInt(savedObj);
+    
+    if (currentCharacter) {
+        currentMission = MISSIONS[currentCharacter];
+    }
+    
+    updateRank();
+    updateUI();
+}
+
+function updateRank() {
+    for (let i = RANKS.length - 1; i >= 0; i--) {
+        if (honor >= RANKS[i].minHonor) {
+            currentRank = i;
+            break;
+        }
+    }
+    
+    const rankElement = document.getElementById('current-rank');
+    const progressBar = document.getElementById('rank-progress-bar');
+    
+    if (rankElement) {
+        rankElement.textContent = RANKS[currentRank].name;
+        rankElement.style.color = RANKS[currentRank].color;
+    }
+    
+    if (progressBar) {
+        const currentRankHonor = RANKS[currentRank].minHonor;
+        const nextRankHonor = currentRank < RANKS.length - 1 ? RANKS[currentRank + 1].minHonor : RANKS[currentRank].minHonor + 100;
+        const progress = ((honor - currentRankHonor) / (nextRankHonor - currentRankHonor)) * 100;
+        progressBar.style.width = Math.min(100, progress) + '%';
+    }
+}
+
 // --- NAVIGATION ---
+function showMissionSelect() {
+    document.getElementById('main-menu').classList.add('hidden');
+    document.getElementById('mission-select').classList.remove('hidden');
+}
+
+function selectCharacter(char) {
+    playSnd('click');
+    currentCharacter = char;
+    currentMission = MISSIONS[char];
+    currentObjective = 0;
+    showMissionBriefing();
+}
+
+function showMissionBriefing() {
+    if (!currentMission) return;
+    
+    document.getElementById('mission-select').classList.add('hidden');
+    const briefing = document.getElementById('mission-briefing');
+    briefing.classList.remove('hidden');
+    
+    document.getElementById('character-name').textContent = currentMission.name;
+    document.getElementById('character-quote').textContent = currentMission.quote;
+    document.getElementById('character-portrait').style.background = currentMission.color;
+    
+    const objective = currentMission.objectives[currentObjective];
+    document.getElementById('mission-text').textContent = objective.text;
+    document.getElementById('reward-gold').textContent = objective.target + " GOLD";
+    document.getElementById('reward-honor').textContent = objective.reward + " HONOR";
+    
+    const nextRank = currentRank < RANKS.length - 1 ? RANKS[currentRank + 1].name : "MAX RANK";
+    document.getElementById('next-rank').textContent = nextRank;
+}
+
+function startMission() {
+    playSnd('click');
+    if (!currentCharacter) {
+        currentCharacter = 'rikimaru';
+        currentMission = MISSIONS[currentCharacter];
+    }
+    
+    document.getElementById('mission-briefing').classList.add('hidden');
+    document.getElementById('mission-select').classList.add('hidden');
+    startGame();
+}
+
 function startGame() {
     document.getElementById('main-menu').classList.add('hidden');
     document.getElementById('game-view').classList.remove('hidden');
+    updateMissionIndicator();
     initMachine();
 }
 
+function showInstructions() {
+    document.getElementById('main-menu').classList.add('hidden');
+    document.getElementById('info-screen').classList.remove('hidden');
+}
+
 function toggleInfo() {
-    document.getElementById('info-screen').classList.toggle('hidden');
+    document.getElementById('info-screen').classList.add('hidden');
+    document.getElementById('main-menu').classList.remove('hidden');
+}
+
+function returnToBase() {
+    playSnd('click');
+    if (coins < 5) {
+        // No gold left, return to menu
+        document.getElementById('game-view').classList.add('hidden');
+        document.getElementById('main-menu').classList.remove('hidden');
+        saveGame();
+    } else {
+        // Continue mission
+        document.getElementById('result-panel').classList.add('hidden');
+    }
 }
 
 function shareGame() {
-    const shareText = `I have ${coins} gold in SHINOBI STRIKE! Can you beat my score?`;
+    const shareText = `I have achieved the rank of ${RANKS[currentRank].name} with ${honor} Honor in TENCHU: Shadow Mission! Can you surpass my shadow?`;
     if (navigator.share) {
         navigator.share({
-            title: 'SHINOBI STRIKE',
+            title: 'TENCHU: Shadow Mission',
             text: shareText,
             url: window.location.href
         });
     } else {
         navigator.clipboard.writeText(shareText);
-        alert('Score copied to clipboard!');
+        alert('Honor record copied to scroll!');
     }
-}
-
-// --- COIN SAVING SYSTEM ---
-function saveCoins() {
-    localStorage.setItem('shinobiStrike_coins', coins);
-    localStorage.setItem('shinobiStrike_highScore', Math.max(highScore, coins));
-}
-
-function loadCoins() {
-    const saved = localStorage.getItem('shinobiStrike_coins');
-    const savedHigh = localStorage.getItem('shinobiStrike_highScore');
-    if (saved) {
-        coins = parseInt(saved);
-        highScore = savedHigh ? parseInt(savedHigh) : coins;
-    }
-    updateUI();
 }
 
 // --- PARTICLE EFFECTS ---
-function createParticles(count, element) {
+function createBloodParticles(count, element) {
     const particles = document.getElementById('particles');
     const rect = element.getBoundingClientRect();
     
@@ -73,18 +226,17 @@ function createParticles(count, element) {
         particle.className = 'particle';
         particle.style.left = (rect.left + rect.width/2) + 'px';
         particle.style.top = (rect.top + rect.height/2) + 'px';
-        particle.style.backgroundColor = ['#ffcc00', '#ff9900', '#ff6600'][Math.floor(Math.random() * 3)];
+        particle.style.backgroundColor = ['#ff3300', '#990000', '#cc0000'][Math.floor(Math.random() * 3)];
         
         particles.appendChild(particle);
         
-        // Animate particle
         const angle = Math.random() * Math.PI * 2;
-        const speed = 2 + Math.random() * 3;
-        const duration = 0.5 + Math.random() * 0.5;
+        const speed = 1 + Math.random() * 2;
+        const duration = 0.3 + Math.random() * 0.3;
         
         particle.animate([
             { transform: 'translate(0,0) scale(1)', opacity: 1 },
-            { transform: `translate(${Math.cos(angle) * speed * 100}px, ${Math.sin(angle) * speed * 100}px) scale(0)`, opacity: 0 }
+            { transform: `translate(${Math.cos(angle) * speed * 50}px, ${Math.sin(angle) * speed * 50}px) scale(0)`, opacity: 0 }
         ], {
             duration: duration * 1000,
             easing: 'ease-out'
@@ -110,14 +262,24 @@ function initMachine() {
 function createSym(id) {
     const d = document.createElement('div');
     d.className = 'symbol';
+    d.setAttribute('data-symbol', SYMBOL_NAMES[id - 1]);
+    
     const img = document.createElement('img');
     img.src = `images/${id}.png`;
     img.onerror = () => { 
         img.remove(); 
         d.innerText = EMOJIS[id - 1] || '🏮'; 
+        d.style.fontSize = '2.8rem';
     };
     d.appendChild(img);
     return d;
+}
+
+function updateMissionIndicator() {
+    if (!currentMission) return;
+    const indicator = document.getElementById('mission-indicator');
+    const objective = currentMission.objectives[currentObjective];
+    indicator.textContent = `${currentMission.name}: ${coins}/${objective.target} GOLD`;
 }
 
 // --- SPIN SYSTEM ---
@@ -141,10 +303,9 @@ function startSpin() {
         isSpinning[i] = true;
         document.getElementById(`strip-${i}`).classList.add('spinning');
         
-        // Staggered stop timing
         setTimeout(() => {
             stopReel(i);
-        }, 1000 + (i * 600)); 
+        }, 1000 + (i * 600));
     }
 }
 
@@ -164,7 +325,6 @@ function stopReel(i) {
     
     strip.classList.remove('spinning');
     
-    // Independent Random Generation for each column
     grid[i] = [
         Math.floor(Math.random() * SYMBOLS) + 1,
         Math.floor(Math.random() * SYMBOLS) + 1,
@@ -174,7 +334,6 @@ function stopReel(i) {
     strip.innerHTML = '';
     grid[i].forEach(id => strip.appendChild(createSym(id)));
 
-    // Check results once the LAST reel has stopped
     if (!isSpinning.includes(true)) {
         stopLoopSnd('spinning');
         checkResult();
@@ -184,7 +343,7 @@ function stopReel(i) {
 // --- WIN LOGIC ---
 function checkResult() {
     let lines = [];
-    const g = grid; 
+    const g = grid;
 
     // Horizontal Lines
     for (let r = 0; r < 3; r++) {
@@ -214,7 +373,7 @@ function highlight(l) {
         }
         if (target) {
             target.classList.add('winning-symbol');
-            createParticles(3, target);
+            createBloodParticles(5, target);
         }
     }
 }
@@ -223,70 +382,141 @@ function finalize(lines) {
     const panel = document.getElementById('result-panel');
     const type = document.getElementById('res-type');
     const cash = document.getElementById('res-coins');
+    const missionUpdate = document.getElementById('mission-update');
     panel.classList.remove('hidden');
     playSnd('feedback');
 
     if (lines.length > 0) {
         let total = 0;
         lines.forEach(l => {
-            // Reduced rewards
-            let pay = (l.id === 6) ? 100 : (l.id > 3 ? 40 : 15);
+            // TENCHU-THEMED REWARDS (MAX 50)
+            let pay = 0;
+            switch(l.id) {
+                case 1: // Ninja (Rikimaru) - Character
+                    pay = 30;
+                    break;
+                case 4: // Oni - Character
+                    pay = 25;
+                    break;
+                case 6: // Castle Lord - Character (Elite)
+                    pay = 50;
+                    break;
+                case 2: // Kodachi - Item
+                    pay = 15;
+                    break;
+                case 3: // Lantern - Item
+                    pay = 10;
+                    break;
+                case 5: // Scroll - Item
+                    pay = 8;
+                    break;
+                default:
+                    pay = 10;
+            }
             total += pay;
             highlight(l);
         });
 
         if (lines.length > 1) {
-            type.innerText = "MULTI-KILL!";
-            total = Math.floor(total * 1.3); // Reduced multiplier
+            type.innerText = "MULTIPLE ASSASSINATIONS!";
+            total = Math.floor(total * 1.3);
+            type.style.color = "#ff0000";
         } else {
             type.innerText = "TARGET ELIMINATED!";
+            type.style.color = "#ff3300";
         }
         
-        const finalReward = Math.floor(total);
-        cash.innerText = `+${finalReward} GOLD`;
+        const finalReward = Math.min(50, Math.floor(total)); // Cap at 50
+        cash.innerText = `+${finalReward} RYŌ`;
+        cash.style.color = "#ffcc00";
         
-        // Screen shake for big wins
-        if (finalReward > 50) {
+        // Check mission objective
+        missionUpdate.textContent = "";
+        if (currentMission) {
+            const objective = currentMission.objectives[currentObjective];
+            const oldCoins = coins;
+            animateCoins(finalReward, () => {
+                // Check if objective completed
+                if (coins >= objective.target && oldCoins < objective.target) {
+                    missionUpdate.innerHTML = `<span style="color:#00ff00">✓ MISSION COMPLETE!</span><br>${objective.reward} Honor earned!`;
+                    honor += objective.reward;
+                    missionsCompleted++;
+                    
+                    // Move to next objective or complete mission
+                    if (currentObjective < currentMission.objectives.length - 1) {
+                        currentObjective++;
+                        setTimeout(() => {
+                            missionUpdate.innerHTML += `<br><span style="color:#ffcc00">New objective available!</span>`;
+                        }, 1000);
+                    } else {
+                        setTimeout(() => {
+                            missionUpdate.innerHTML += `<br><span style="color:#ffcc00">${currentMission.name}'s mission fully completed!</span>`;
+                        }, 1000);
+                    }
+                    
+                    updateRank();
+                    saveGame();
+                }
+                updateMissionIndicator();
+            });
+        } else {
+            animateCoins(finalReward);
+        }
+        
+        if (finalReward >= 40) {
             document.getElementById('game-view').classList.add('screen-shake');
             setTimeout(() => {
                 document.getElementById('game-view').classList.remove('screen-shake');
             }, 500);
         }
         
-        animateCoins(finalReward);
         playSnd('win');
     } else {
-        type.innerText = "MISSED!";
-        cash.innerText = "No bounty earned.";
+        type.innerText = "TARGET ESCAPED!";
+        type.style.color = "#666666";
+        cash.textContent = "The shadow retreats...";
+        cash.style.color = "#999999";
+        missionUpdate.textContent = "";
         playSnd('lose');
-    }
-
-    if (coins < 5 && lines.length === 0) {
-        setTimeout(() => {
-            type.innerText = "MISSION FAILED";
-            cash.innerText = "Out of gold.";
-        }, 1000);
+        
+        // Check if out of gold
+        if (coins < 5) {
+            setTimeout(() => {
+                type.innerText = "MISSION FAILED";
+                cash.textContent = "Out of resources...";
+                missionUpdate.innerHTML = `<span style="color:#ff3300">Returning to base camp...</span>`;
+                
+                setTimeout(() => {
+                    returnToBase();
+                }, 2000);
+            }, 1000);
+        }
     }
 
     setTimeout(() => {
         busy = false;
         if (coins >= 5) {
             document.getElementById('spin-btn').classList.remove('hidden-btn');
+        } else {
+            // Auto-return to base when out of gold
+            setTimeout(() => {
+                returnToBase();
+            }, 1000);
         }
-        panel.classList.add('hidden');
-    }, 2000);
+    }, 2500);
 }
 
-// --- COIN ANIMATION (FAST) ---
-function animateCoins(amount) {
-    const steps = Math.min(10, Math.ceil(amount / 50));
+// --- FAST COIN ANIMATION ---
+function animateCoins(amount, callback) {
+    const steps = Math.min(5, Math.ceil(amount / 20));
     const stepValue = Math.ceil(amount / steps);
     let count = 0;
     
     let timer = setInterval(() => {
         if (count >= amount) {
             clearInterval(timer);
-            saveCoins();
+            saveGame();
+            if (callback) callback();
             return;
         }
         coins += stepValue;
@@ -297,42 +527,45 @@ function animateCoins(amount) {
         }
         updateUI();
         
-        // Coin bounce effect
         document.getElementById('coins').classList.add('coin-bounce');
         setTimeout(() => {
             document.getElementById('coins').classList.remove('coin-bounce');
-        }, 300);
+        }, 200);
         
-    }, 80); // Fast interval
+    }, 60);
 }
 
 // --- UI MANAGEMENT ---
+function updateUI() { 
+    const coinEl = document.getElementById('coins');
+    const honorEl = document.getElementById('honor');
+    if (coinEl) coinEl.textContent = coins; 
+    if (honorEl) honorEl.textContent = honor;
+    updateSpinButton();
+}
+
 function updateSpinButton() {
     const spinBtn = document.getElementById('spin-btn');
     if (coins < 5) {
         spinBtn.style.opacity = '0.5';
         spinBtn.style.cursor = 'not-allowed';
-        spinBtn.title = 'Need 5 gold to spin';
+        spinBtn.title = 'Insufficient ryō for infiltration';
+        spinBtn.textContent = 'NEED 5 RYŌ';
     } else {
         spinBtn.style.opacity = '1';
         spinBtn.style.cursor = 'pointer';
-        spinBtn.title = 'Spin the reels (5 gold)';
+        spinBtn.title = 'Begin infiltration (5 ryō)';
+        spinBtn.textContent = 'SPIN (5 RYŌ)';
     }
-}
-
-function updateUI() { 
-    const el = document.getElementById('coins');
-    if (el) el.innerText = coins; 
-    updateSpinButton();
 }
 
 // --- INITIALIZATION ---
 window.onload = () => {
-    loadCoins();
-    
-    const btn = document.getElementById('spin-btn');
-    if(btn) btn.onclick = startSpin;
+    loadGame();
     
     // Auto-save every 30 seconds
-    setInterval(saveCoins, 30000);
+    setInterval(saveGame, 30000);
+    
+    // Update rank display
+    updateRank();
 };
