@@ -1,6 +1,6 @@
 const SYMBOL_TYPES = 6;
 const EMOJIS = ['🥷', '🗡️', '🏮', '👺', '📜', '🏯'];
-let coins = 100; // Lower starting money
+let coins = 100;
 let isSpinning = [false, false, false];
 let gridResult = [[], [], []];
 let isProcessing = false;
@@ -10,12 +10,19 @@ function init() {
     updateUI();
 }
 
-function createSymbol(id, isWinning = false) {
+function updateUI() {
+    document.getElementById('coins').innerText = coins;
+}
+
+function createSymbol(id) {
     const div = document.createElement('div');
-    div.className = `symbol ${isWinning ? 'winning-symbol' : ''}`;
+    div.className = 'symbol';
     const img = document.createElement('img');
     img.src = `images/${id}.png`;
-    img.onerror = () => { img.remove(); div.innerText = EMOJIS[id - 1]; };
+    img.onerror = () => { 
+        img.remove(); 
+        div.innerText = EMOJIS[id - 1] || '🧧'; 
+    };
     div.appendChild(img);
     return div;
 }
@@ -30,15 +37,18 @@ function randomizeReel(reelIdx) {
 
 function startSpin() {
     if (coins < 5 || isProcessing) return;
-    
-    // Reset visuals
-    document.getElementById('result-overlay').classList.add('hidden');
-    document.getElementById('machine-frame').classList.remove('shake');
 
-    coins -= 5; // Cheaper bet
-    updateUI();
+    // Reset Visuals
     isProcessing = true;
-    document.getElementById('spin-btn').disabled = true;
+    document.getElementById('result-overlay').classList.add('hidden');
+    document.getElementById('spin-btn').classList.add('hidden-btn'); 
+    document.getElementById('machine-frame').classList.remove('shake');
+    
+    // Clear old winning highlights
+    document.querySelectorAll('.symbol').forEach(s => s.classList.remove('winning-symbol'));
+
+    coins -= 5;
+    updateUI();
 
     for (let i = 0; i < 3; i++) {
         isSpinning[i] = true;
@@ -48,10 +58,12 @@ function startSpin() {
 
 function stopReel(i) {
     if (!isSpinning[i]) return;
+    
     const strip = document.getElementById(`strip-${i}`);
     strip.classList.remove('spinning');
     isSpinning[i] = false;
 
+    // Generate column results
     gridResult[i] = [
         Math.floor(Math.random() * SYMBOL_TYPES) + 1,
         Math.floor(Math.random() * SYMBOL_TYPES) + 1,
@@ -61,88 +73,78 @@ function stopReel(i) {
     strip.innerHTML = '';
     gridResult[i].forEach(id => strip.appendChild(createSymbol(id)));
 
-    if (!isSpinning.includes(true)) evaluateGame();
+    // Weight/Shake effect when reel stops
+    document.getElementById(`reel-${i}`).classList.add('shake');
+    setTimeout(() => document.getElementById(`reel-${i}`).classList.remove('shake'), 300);
+
+    if (!isSpinning.includes(true)) {
+        setTimeout(evaluateGame, 500);
+    }
 }
 
 function evaluateGame() {
-    let winningLines = [];
+    let wins = [];
     const g = gridResult;
 
-    // Check Rows
+    // Row Checks
     for (let r = 0; r < 3; r++) {
-        if (g[0][r] === g[1][r] && g[1][r] === g[2][r]) winningLines.push({type: 'row', index: r});
+        if (g[0][r] === g[1][r] && g[1][r] === g[2][r]) wins.push({type: 'row', idx: r});
     }
-    // Check Diagonals
-    if (g[0][0] === g[1][1] && g[1][1] === g[2][2]) winningLines.push({type: 'diag', index: 0});
-    if (g[0][2] === g[1][1] && g[1][1] === g[2][0]) winningLines.push({type: 'diag', index: 1});
+    // Diagonal Checks
+    if (g[0][0] === g[1][1] && g[1][1] === g[2][2]) wins.push({type: 'diag', idx: 0});
+    if (g[0][2] === g[1][1] && g[1][1] === g[2][0]) wins.push({type: 'diag', idx: 1});
 
-    setTimeout(() => {
-        showFeedback(winningLines);
-    }, 300);
+    showResult(wins);
 }
 
-function showFeedback(lines) {
+function showResult(wins) {
     const overlay = document.getElementById('result-overlay');
     const title = document.getElementById('result-title');
     overlay.classList.remove('hidden');
 
-    if (lines.length > 0) {
-        let winTotal = lines.length * 25;
-        coins += winTotal;
-        title.innerText = "VICTORY";
+    if (wins.length > 0) {
+        coins += (wins.length * 50);
+        title.innerText = "SLAIN";
         title.style.color = "var(--gold)";
-        spawnParticles("var(--gold)");
-        highlightWins(lines);
+        highlightWins(wins);
+        spawnBlood(40); // Explosive blood
     } else {
-        title.innerText = "DEFEAT";
-        title.style.color = "var(--blood-red)";
-        document.getElementById('machine-frame').classList.add('shake');
-        spawnParticles("#444");
+        title.innerText = "EXECUTED";
+        title.style.color = "var(--blood)";
+        spawnBlood(10); // Minimal blood
     }
 
     updateUI();
 
-    // Lockdown: Wait 2 seconds before allowing next spin
     setTimeout(() => {
         isProcessing = false;
-        document.getElementById('spin-btn').disabled = false;
-        document.getElementById('message').innerText = "READY FOR NEXT MISSION";
+        overlay.classList.add('hidden');
+        document.getElementById('spin-btn').classList.remove('hidden-btn');
     }, 2000);
 }
 
-function highlightWins(lines) {
-    lines.forEach(line => {
+function highlightWins(wins) {
+    wins.forEach(w => {
         for (let reel = 0; reel < 3; reel++) {
-            let row;
-            if (line.type === 'row') row = line.index;
-            else if (line.type === 'diag') row = (line.index === 0) ? reel : 2 - reel;
-            
-            const symbol = document.getElementById(`strip-${reel}`).children[row];
-            symbol.classList.add('winning-symbol');
+            let row = (w.type === 'row') ? w.idx : (w.idx === 0 ? reel : 2 - reel);
+            document.getElementById(`strip-${reel}`).children[row].classList.add('winning-symbol');
         }
     });
 }
 
-function spawnParticles(color) {
-    for (let i = 0; i < 20; i++) {
-        const p = document.createElement('div');
-        p.className = 'particle';
-        p.style.backgroundColor = color;
-        p.style.left = Math.random() * 100 + 'vw';
-        p.style.top = '100vh';
-        document.body.appendChild(p);
-        
-        const anim = p.animate([
-            { transform: `translate(0, 0)`, opacity: 1 },
-            { transform: `translate(${(Math.random()-0.5)*200}px, -100vh)`, opacity: 0 }
-        ], { duration: 1000 + Math.random() * 1000 });
-        
-        anim.onfinish = () => p.remove();
-    }
-}
+function spawnBlood(count) {
+    for (let i = 0; i < count; i++) {
+        const drop = document.createElement('div');
+        drop.className = 'blood-drop';
+        drop.style.left = Math.random() * 100 + 'vw';
+        drop.style.top = '-20px';
+        document.body.appendChild(drop);
 
-function updateUI() {
-    document.getElementById('coins').innerText = coins;
+        drop.animate([
+            { transform: 'translateY(0)', opacity: 1 },
+            { transform: `translateY(100vh)`, opacity: 0 }
+        ], { duration: 1000 + Math.random() * 2000 }).onfinish = () => drop.remove();
+    }
 }
 
 window.onload = init;
