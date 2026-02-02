@@ -1,7 +1,7 @@
 :root {
+    --blood: #8b0000;
+    --neon-blood: #ff0000;
     --gold: #d4af37;
-    --blood-red: #8b0000;
-    --ninja-black: #1a1a1a;
 }
 
 body {
@@ -17,105 +17,118 @@ body {
     touch-action: manipulation;
 }
 
-.game-container { text-align: center; width: 95%; max-width: 450px; }
+.game-container { text-align: center; width: 95%; max-width: 400px; }
 
 .header {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 15px;
+    border-bottom: 2px solid var(--blood);
     padding: 10px;
-    border: 1px solid var(--blood-red);
-    background: rgba(0, 0, 0, 0.8);
+    margin-bottom: 20px;
+    background: rgba(0,0,0,0.8);
 }
 
-/* The Slot Machine */
+.score-box { font-size: 1.5rem; color: var(--gold); font-weight: bold; }
+
+/* The Machine */
 .slot-machine {
     display: flex;
     justify-content: center;
-    gap: 8px;
-    background: var(--ninja-black);
-    padding: 15px;
-    border: 5px solid #333;
+    gap: 5px;
+    background: #111;
+    padding: 10px;
+    border: 4px solid #222;
     position: relative;
+    box-shadow: 0 0 20px #000;
 }
 
 .reel {
-    width: 100px;
-    height: 300px;
+    width: 110px;
+    height: 330px;
     background: #000;
-    border: 1px solid #444;
+    border: 1px solid #333;
     overflow: hidden;
     position: relative;
-}
-
-.strip { position: absolute; width: 100%; }
-
-.symbol {
-    width: 100px;
-    height: 100px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 2.5rem;
-}
-
-.symbol img { width: 80%; height: 80%; object-fit: contain; }
-
-/* Feedback Overlay */
-#result-overlay {
-    position: absolute;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.8);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    z-index: 10;
-    transition: 0.3s;
-}
-
-.hidden { display: none !important; }
-
-#result-title { font-size: 2.5rem; margin: 0; color: var(--blood-red); }
-
-/* Winning Highlight */
-.winning-symbol {
-    background: rgba(212, 175, 55, 0.3);
-    box-shadow: inset 0 0 15px var(--gold);
-    animation: flash 0.5s infinite alternate;
-}
-
-@keyframes flash { from { opacity: 1; } to { opacity: 0.5; } }
-
-/* Screen Shake for Loss */
-.shake { animation: shake 0.4s; }
-@keyframes shake {
-    0% { transform: translate(1px, 1px); }
-    20% { transform: translate(-3px, 0); }
-    40% { transform: translate(3px, 2px); }
-    60% { transform: translate(-3px, -1px); }
-    100% { transform: translate(0, 0); }
-}
-
-/* Particles */
-.particle {
-    position: absolute;
-    width: 8px;
-    height: 8px;
-    background: var(--gold);
-    pointer-events: none;
-}
-
-button {
-    margin-top: 25px;
-    width: 100%;
-    padding: 15px;
-    background: var(--blood-red);
-    color: white;
-    border: 2px solid var(--gold);
-    font-weight: bold;
     cursor: pointer;
 }
 
-.spinning { animation: scroll 0.15s linear infinite; filter: blur(3px); }
-@keyframes scroll { from { transform: translateY(0); } to { transform: translateY(-300px); } }
+.strip { position: absolute; width: 100%; transition: transform 0.1s ease-out; }
+
+.symbol {
+    width: 110px;
+    height: 110px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2.8rem;
+    box-sizing: border-box;
+}
+
+.symbol img { width: 85%; height: 85%; object-fit: contain; }
+
+/* The Bloody Glow */
+.winning-symbol {
+    position: relative;
+    z-index: 10;
+    border: 2px solid var(--neon-blood);
+    box-shadow: inset 0 0 25px var(--blood), 0 0 35px var(--neon-blood);
+    background: rgba(139, 0, 0, 0.2);
+    animation: bloodPulse 0.6s infinite alternate;
+}
+
+@keyframes bloodPulse {
+    from { opacity: 0.8; } to { opacity: 1; transform: scale(1.02); }
+}
+
+/* Result Overlay */
+#result-overlay {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+}
+
+#result-title { font-size: 3rem; letter-spacing: 5px; text-shadow: 0 0 20px var(--blood); }
+
+.hidden { display: none !important; }
+
+/* Button Juiciness */
+button {
+    margin-top: 30px;
+    width: 80%;
+    padding: 15px;
+    background: var(--blood);
+    color: white;
+    border: 1px solid var(--gold);
+    font-size: 1.5rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s all ease;
+}
+
+.hidden-btn {
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(0.5);
+}
+
+/* Blood FX */
+.blood-drop {
+    position: absolute;
+    width: 4px;
+    height: 15px;
+    background: var(--neon-blood);
+    pointer-events: none;
+    z-index: 999;
+}
+
+.spinning { animation: scroll 0.12s linear infinite; filter: blur(4px); }
+@keyframes scroll { from { transform: translateY(0); } to { transform: translateY(-330px); } }
+
+.shake { animation: shakeEffect 0.3s; }
+@keyframes shakeEffect {
+    0% { transform: translate(2px, 2px); }
+    50% { transform: translate(-4px, -2px); }
+    100% { transform: translate(0, 0); }
+}
