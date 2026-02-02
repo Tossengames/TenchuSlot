@@ -10,8 +10,7 @@
 
     <div class="game-container">
         <div class="header">
-            <div class="stat-box">COINS: <span id="coins">100</span></div>
-            <div class="stat-box">RANK: <span id="rank">NOVICE</span></div>
+            <div class="score-box">GOLD: <span id="coins">100</span></div>
         </div>
 
         <div class="slot-machine" id="machine-frame">
@@ -24,19 +23,17 @@
             <div class="reel" id="reel-2" onclick="stopReel(2)">
                 <div class="strip" id="strip-2"></div>
             </div>
+
             <div id="result-overlay" class="hidden">
                 <h1 id="result-title"></h1>
-                <p id="result-subtitle"></p>
             </div>
         </div>
 
         <div class="controls">
-            <button id="spin-btn" onclick="startSpin()">START MISSION</button>
-            <p id="message">STEALTH IS KEY...</p>
+            <button id="spin-btn" onclick="startSpin()">SPIN</button>
+            <p id="message">STRIKE FROM SHADOWS</p>
         </div>
     </div>
-
-    <div id="particle-container"></div>
 
     <script src="game.js"></script>
 </body>
