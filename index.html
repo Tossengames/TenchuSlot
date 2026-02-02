@@ -11,21 +11,21 @@
     <div id="main-menu" class="screen">
         <h1 class="glitch-title">SHINOBI<br>STRIKE</h1>
         <div class="menu-btns">
-            <button onclick="startGame()">START MISSION</button>
-            <button onclick="toggleInfo()">INSTRUCTIONS</button>
-            <button class="share-btn" onclick="shareGame()">SHARE SCORE</button>
+            <button onclick="playSnd('click'); startGame()">START MISSION</button>
+            <button onclick="playSnd('click'); toggleInfo()">INSTRUCTIONS</button>
+            <button class="share-btn" onclick="playSnd('click'); shareGame()">SHARE SCORE</button>
         </div>
     </div>
 
     <div id="info-screen" class="screen hidden">
         <h2>SCROLL OF RULES</h2>
         <div class="rules-content">
-            <p>1. Tap SPIN to begin. (Cost: 5 Gold)</p>
-            <p>2. Tap each reel to STOP it manually.</p>
-            <p>3. Match 3 across or diagonal.</p>
-            <p>4. Symbol 6 is the Legendary Payout!</p>
+            <p>1. Tap SPIN to begin (5 Gold).</p>
+            <p>2. Tap each reel to STOP.</p>
+            <p>3. Match 3 Horizontal, Vertical, or Diagonal.</p>
+            <p>4. Symbol 6 pays the most!</p>
         </div>
-        <button onclick="toggleInfo()">BACK</button>
+        <button onclick="playSnd('click'); toggleInfo()">BACK</button>
     </div>
 
     <div id="game-view" class="screen hidden">
@@ -48,15 +48,19 @@
         <div class="game-footer">
             <button id="spin-btn" onclick="startSpin()">SPIN</button>
             <div class="footer-btns">
-                <button class="mini-btn" onclick="window.open('https://paypal.me/yourlink')">DONATE</button>
+                <button class="mini-btn" onclick="window.open('https://ko-fi.com/yourname')">KO-FI</button>
                 <button class="mini-btn" onclick="location.reload()">QUIT</button>
             </div>
         </div>
     </div>
 
-    <audio id="snd-spin" src="sounds/spin.mp3" preload="auto"></audio>
-    <audio id="snd-stop" src="sounds/stop.mp3" preload="auto"></audio>
-    <audio id="snd-win" src="sounds/win.mp3" preload="auto"></audio>
+    <audio id="snd-click" src="sounds/click.mp3"></audio>
+    <audio id="snd-spin-start" src="sounds/spin.mp3"></audio>
+    <audio id="snd-spinning" src="sounds/spinning.mp3" loop></audio>
+    <audio id="snd-stop" src="sounds/stop.mp3"></audio>
+    <audio id="snd-win" src="sounds/win.mp3"></audio>
+    <audio id="snd-lose" src="sounds/lose.mp3"></audio>
+    <audio id="snd-feedback" src="sounds/feedback.mp3"></audio>
 
     <script src="game.js"></script>
 </body>
