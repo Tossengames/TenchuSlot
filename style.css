@@ -11,7 +11,7 @@ body {
     background-color: #000;
     color: #fff;
     margin: 0;
-    font-family: 'Segoe UI', sans-serif;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     overflow: hidden;
     background-image: 
         radial-gradient(circle at 20% 80%, rgba(255, 51, 0, 0.1) 0%, transparent 50%),
@@ -20,11 +20,15 @@ body {
 
 .screen {
     position: absolute;
-    width: 100%; height: 100%;
-    display: flex; flex-direction: column;
-    justify-content: center; align-items: center;
+    width: 100%; 
+    height: 100%;
+    display: flex; 
+    flex-direction: column;
+    justify-content: center; 
+    align-items: center;
     background: radial-gradient(circle, #1a0000 0%, #000 100%);
     text-align: center;
+    z-index: 1;
 }
 
 .menu-btns {
@@ -35,11 +39,13 @@ body {
     gap: 15px;
 }
 
-.hidden { display: none !important; }
+.hidden { 
+    display: none !important; 
+}
 
 /* Ninja Scroll Title */
 .glitch-title {
-    font-size: 4rem;
+    font-size: 3.5rem;
     color: var(--crimson);
     text-shadow: 
         0 0 10px var(--blood),
@@ -67,7 +73,7 @@ body {
     50% { transform: translateX(100%); }
 }
 
-/* Game header improvements */
+/* Game header */
 .game-header {
     position: absolute;
     top: 0;
@@ -97,6 +103,8 @@ body {
     font-size: 1.1rem;
     color: #fff;
     box-shadow: 0 0 10px rgba(153, 0, 0, 0.5);
+    min-width: 120px;
+    text-align: center;
 }
 
 .coin-bounce {
@@ -108,7 +116,7 @@ body {
     50% { transform: scale(1.2); color: #ffcc00; }
 }
 
-/* BLOODY RESULT PANEL */
+/* Result Panel */
 #result-panel {
     position: absolute;
     top: 50%;
@@ -119,14 +127,13 @@ body {
     height: auto;
     min-height: 200px;
     background: rgba(26, 0, 0, 0.95);
-    backdrop-filter: blur(10px);
     border: 3px solid var(--crimson);
     border-radius: 15px;
     padding: 25px;
     box-shadow: 
         0 0 50px rgba(255, 51, 0, 0.7),
         inset 0 0 30px rgba(153, 0, 0, 0.3);
-    z-index: 10;
+    z-index: 20;
     display: flex; 
     flex-direction: column; 
     justify-content: center; 
@@ -136,10 +143,8 @@ body {
 
 #res-type { 
     color: var(--crimson); 
-    font-size: 2.2rem;
+    font-size: 2rem;
     margin: 10px 0; 
-    width: 90%;
-    word-wrap: break-word;
     text-shadow: 0 0 10px var(--blood);
     font-family: 'Georgia', serif;
 }
@@ -148,58 +153,43 @@ body {
     font-size: 1.8rem;
     color: #ffcc00;
     margin: 15px 0;
-    text-shadow: 0 0 5px #ff9900;
 }
 
-/* BUTTONS */
+/* Buttons */
 button {
     background: linear-gradient(to bottom, var(--blood), #660000); 
     color: #fff; 
     border: 2px solid var(--crimson);
-    padding: 15px 40px; 
+    padding: 15px 30px; 
     font-weight: bold; 
     margin: 10px;
-    width: 280px;
+    width: 250px;
     border-radius: 5px; 
     cursor: pointer;
     transition: all 0.3s ease;
     font-family: 'Georgia', serif;
-    letter-spacing: 1px;
     text-shadow: 1px 1px 2px #000;
-    position: relative;
-    overflow: hidden;
+    font-size: 1.1rem;
 }
 
-button::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 51, 0, 0.3), transparent);
-    transition: left 0.5s;
+button:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255, 51, 0, 0.4);
 }
 
-button:hover::before {
-    left: 100%;
-}
-
-button:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 5px 20px rgba(255, 51, 0, 0.5);
-    border-color: #ff6600;
-}
-
-button:active {
+button:active:not(:disabled) {
     transform: translateY(0);
+}
+
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 #spin-btn { 
     width: 80%; 
-    max-width: 320px; 
+    max-width: 300px; 
     font-size: 1.2rem;
-    background: linear-gradient(to bottom, #990000, #660000);
 }
 
 .hidden-btn { 
@@ -209,10 +199,10 @@ button:active {
 
 .mini-btn { 
     width: auto; 
-    padding: 8px 20px; 
+    padding: 8px 15px; 
     font-size: 0.9rem; 
     background: #222; 
-    border-width: 1px;
+    margin: 5px;
 }
 
 .donate-btn {
@@ -220,100 +210,84 @@ button:active {
     border-color: #00cc00;
 }
 
-/* REELS */
+/* Reels */
 .slot-machine { 
     display: flex; 
-    gap: 8px; 
+    gap: 10px; 
     background: linear-gradient(to bottom, #333, #111); 
     padding: 15px; 
-    border: 4px solid #444; 
+    border: 3px solid #444; 
     position: relative; 
     margin-top: 100px;
     margin-bottom: 30px;
     border-radius: 10px;
-    box-shadow: 
-        inset 0 0 20px rgba(0,0,0,0.8),
-        0 0 30px rgba(153,0,0,0.3);
+    z-index: 2;
 }
 
 .reel { 
-    width: 30vw; 
-    max-width: 110px; 
-    height: 320px; 
+    width: 100px; 
+    height: 300px; 
     background: linear-gradient(to bottom, #000, #111); 
     overflow: hidden; 
     position: relative; 
     border: 2px solid #333; 
     transition: transform 0.2s ease;
     cursor: pointer;
-    border-radius: 5px;
-}
-
-.reel:hover {
-    border-color: var(--crimson);
+    user-select: none;
 }
 
 .reel:active {
     transform: scale(0.95);
-    box-shadow: inset 0 0 20px rgba(255, 51, 0, 0.5);
 }
 
 .strip { 
     position: absolute; 
     width: 100%; 
+    transition: transform 0.3s ease-out;
 }
 
 .symbol { 
     width: 100%; 
-    height: 106px; 
+    height: 100px; 
     display: flex; 
     justify-content: center; 
     align-items: center; 
-    font-size: 2.8rem; 
+    font-size: 3.5rem; 
     background: rgba(0,0,0,0.3);
-}
-
-.symbol img { 
-    width: 85%; 
-    height: 85%; 
-    object-fit: contain; 
-    filter: drop-shadow(0 0 5px rgba(255,51,0,0.5));
+    text-shadow: 0 0 10px rgba(255,51,0,0.5);
 }
 
 .spinning { 
-    animation: scroll 0.08s linear infinite; 
-    filter: blur(3px) brightness(1.5);
+    animation: scroll 0.1s linear infinite; 
+    filter: blur(1px) brightness(1.2);
 }
 
 @keyframes scroll { 
     from { transform: translateY(0); } 
-    to { transform: translateY(-320px); } 
+    to { transform: translateY(-300px); } 
 }
 
-/* BLOODY WINNING HIGHLIGHT */
+/* Winning Highlight */
 .winning-symbol {
     animation: bloodyPulse 0.6s ease 3;
     box-shadow: 
-        inset 0 0 40px rgba(255, 51, 0, 0.7),
-        0 0 40px var(--crimson);
+        inset 0 0 30px rgba(255, 51, 0, 0.7),
+        0 0 30px var(--crimson);
     border: 3px solid var(--crimson);
-    transform: scale(1.08);
-    background: rgba(153, 0, 0, 0.2);
+    background: rgba(153, 0, 0, 0.3);
 }
 
 @keyframes bloodyPulse {
     0%, 100% { 
         box-shadow: 
-            inset 0 0 40px rgba(255, 51, 0, 0.7),
-            0 0 40px var(--crimson);
-        transform: scale(1.08);
+            inset 0 0 30px rgba(255, 51, 0, 0.7),
+            0 0 30px var(--crimson);
     }
     50% { 
         box-shadow: 
-            inset 0 0 60px rgba(255, 0, 0, 0.9),
-            0 0 60px #ff0000,
-            0 0 30px #ff6600;
-        transform: scale(1.15);
+            inset 0 0 50px rgba(255, 0, 0, 0.9),
+            0 0 50px #ff0000,
+            0 0 20px #ff6600;
     }
 }
 
@@ -323,27 +297,26 @@ button:active {
     flex-direction: column;
     align-items: center;
     gap: 15px;
-    margin-top: 20px;
+    z-index: 2;
 }
 
 .footer-btns {
     display: flex;
-    gap: 15px;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
 }
 
-/* Mission Briefing Screen */
+/* Mission screens */
 .mission-screen {
     background: rgba(0,0,0,0.95);
     border: 3px solid var(--crimson);
     border-radius: 15px;
-    padding: 30px;
+    padding: 25px;
     max-width: 600px;
     max-height: 80vh;
     overflow-y: auto;
     margin: 20px;
-    box-shadow: 
-        0 0 50px rgba(255,51,0,0.5),
-        inset 0 0 30px rgba(153,0,0,0.2);
 }
 
 .mission-title {
@@ -363,6 +336,13 @@ button:active {
     background: rgba(26,0,0,0.5);
     border-radius: 10px;
     border-left: 4px solid var(--crimson);
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.mission-character:hover {
+    transform: translateX(10px);
+    background: rgba(26,0,0,0.7);
 }
 
 .character-portrait {
@@ -371,7 +351,10 @@ button:active {
     border-radius: 50%;
     border: 3px solid var(--crimson);
     background: #000;
-    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
 }
 
 .character-info {
@@ -414,11 +397,14 @@ button:active {
     display: flex;
     justify-content: space-around;
     margin: 20px 0;
+    flex-wrap: wrap;
+    gap: 15px;
 }
 
 .reward-item {
     text-align: center;
     padding: 10px;
+    min-width: 120px;
 }
 
 .reward-icon {
@@ -426,18 +412,15 @@ button:active {
     margin-bottom: 5px;
 }
 
-/* Instructions improvements */
 .rules-content {
     background: rgba(26, 0, 0, 0.7);
-    border: 2px solid var(--crimson);
+    border: 1px solid var(--crimson);
     border-radius: 10px;
     padding: 25px;
-    margin: 20px;
-    max-width: 600px;
+    margin: 20px 0;
     text-align: left;
-    max-height: 70vh;
+    max-height: 50vh;
     overflow-y: auto;
-    box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
 }
 
 .rules-content h3 {
@@ -449,8 +432,7 @@ button:active {
 
 .rules-content p {
     margin: 12px 0;
-    font-size: 1.1rem;
-    line-height: 1.5;
+    line-height: 1.6;
 }
 
 .rules-content ul {
@@ -473,6 +455,7 @@ button:active {
     border: 2px solid var(--crimson);
     text-align: center;
     z-index: 5;
+    min-width: 150px;
 }
 
 .rank-name {
@@ -493,7 +476,7 @@ button:active {
     height: 100%;
     background: linear-gradient(to right, var(--blood), var(--crimson));
     width: 0%;
-    transition: width 1s ease;
+    transition: width 0.5s ease;
 }
 
 /* Particle effects */
@@ -504,7 +487,7 @@ button:active {
     width: 100%;
     height: 100%;
     pointer-events: none;
-    z-index: 1;
+    z-index: 3;
 }
 
 .particle {
@@ -518,27 +501,28 @@ button:active {
     box-shadow: 0 0 10px #ff3300;
 }
 
-/* Screen shake for big wins */
+/* Screen shake */
 .screen-shake {
     animation: screenShake 0.5s ease;
 }
 
 @keyframes screenShake {
     0%, 100% { transform: translateX(0); }
-    25% { transform: translateX(-10px); }
-    50% { transform: translateX(10px); }
-    75% { transform: translateX(-10px); }
+    25% { transform: translateX(-5px); }
+    50% { transform: translateX(5px); }
+    75% { transform: translateX(-5px); }
 }
 
 /* Blood Drip Animation */
 .blood-drip {
     position: absolute;
-    width: 3px;
+    width: 2px;
     height: 20px;
     background: var(--crimson);
-    border-radius: 0 0 3px 3px;
+    border-radius: 0 0 2px 2px;
     animation: drip 2s linear infinite;
     opacity: 0.7;
+    z-index: 4;
 }
 
 @keyframes drip {
@@ -546,4 +530,69 @@ button:active {
     10% { opacity: 1; }
     90% { opacity: 1; }
     100% { transform: translateY(100px); opacity: 0; }
+}
+
+/* Mission Complete Animation */
+.mission-complete {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.9);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+    animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Character Colors */
+.rikimaru-color { background: #3366cc; }
+.ayame-color { background: #cc3366; }
+.tatsumaru-color { background: #33cc66; }
+
+/* Responsive */
+@media (max-width: 768px) {
+    .glitch-title {
+        font-size: 2.5rem;
+    }
+    
+    .reel {
+        width: 80px;
+        height: 240px;
+    }
+    
+    .symbol {
+        height: 80px;
+        font-size: 2.5rem;
+    }
+    
+    @keyframes scroll { 
+        from { transform: translateY(0); } 
+        to { transform: translateY(-240px); } 
+    }
+    
+    .game-header {
+        flex-direction: column;
+        gap: 10px;
+        padding: 10px;
+    }
+    
+    .stat {
+        padding: 5px 10px;
+        font-size: 1rem;
+        min-width: 100px;
+    }
+    
+    button {
+        width: 220px;
+        padding: 12px 20px;
+    }
 }
