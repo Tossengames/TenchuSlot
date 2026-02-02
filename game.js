@@ -37,10 +37,12 @@ function initMachine() {
     for (let i = 0; i < 3; i++) {
         const strip = document.getElementById(`strip-${i}`);
         strip.innerHTML = '';
-        // Initialize with random symbols
-        for (let j = 0; j < 3; j++) {
-            strip.appendChild(createSym(Math.floor(Math.random() * SYMBOLS) + 1));
-        }
+        grid[i] = [
+            Math.floor(Math.random() * SYMBOLS) + 1,
+            Math.floor(Math.random() * SYMBOLS) + 1,
+            Math.floor(Math.random() * SYMBOLS) + 1
+        ];
+        grid[i].forEach(id => strip.appendChild(createSym(id)));
     }
     updateUI();
 }
@@ -73,9 +75,16 @@ function startSpin() {
     playSnd('spin-start');
     playSnd('spinning');
 
+    // Start all spinning
     for (let i = 0; i < 3; i++) {
         isSpinning[i] = true;
         document.getElementById(`strip-${i}`).classList.add('spinning');
+        
+        // --- THE FIX: STAGGERED STOP ---
+        // We set a unique timeout for each reel (1s, 1.6s, 2.2s)
+        setTimeout(() => {
+            stopReel(i);
+        }, 1000 + (i * 600)); 
     }
 }
 
@@ -87,7 +96,7 @@ function stopReel(i) {
     const strip = document.getElementById(`strip-${i}`);
     strip.classList.remove('spinning');
     
-    // Random Generation for the 3x3 grid
+    // Independent Random Generation for each column
     grid[i] = [
         Math.floor(Math.random() * SYMBOLS) + 1,
         Math.floor(Math.random() * SYMBOLS) + 1,
@@ -97,27 +106,29 @@ function stopReel(i) {
     strip.innerHTML = '';
     grid[i].forEach(id => strip.appendChild(createSym(id)));
 
+    // Only check results once the LAST reel (index 2) has stopped
     if (!isSpinning.includes(true)) {
         stopLoopSnd('spinning');
         checkResult();
     }
 }
 
+// --- WIN LOGIC ---
 function checkResult() {
     let lines = [];
     const g = grid; 
 
-    // 1. Horizontal
+    // Horizontal Lines
     for (let r = 0; r < 3; r++) {
         if (g[0][r] === g[1][r] && g[1][r] === g[2][r]) lines.push({type:'h', v:r, id:g[0][r]});
     }
 
-    // 2. Vertical 
+    // Vertical Lines
     for (let c = 0; c < 3; c++) {
         if (g[c][0] === g[c][1] && g[c][1] === g[c][2]) lines.push({type:'v', v:c, id:g[c][0]});
     }
 
-    // 3. Diagonals
+    // Diagonal Lines
     if (g[0][0] === g[1][1] && g[1][1] === g[2][2]) lines.push({type:'d', v:0, id:g[1][1]});
     if (g[0][2] === g[1][1] && g[1][1] === g[2][0]) lines.push({type:'d', v:1, id:g[1][1]});
 
@@ -134,7 +145,6 @@ function finalize(lines) {
     if (lines.length > 0) {
         let total = 0;
         lines.forEach(l => {
-            // Payout tiers: Symbol 6 is Jackpot, 4-5 are Elite, 1-3 are Common
             let pay = (l.id === 6) ? 500 : (l.id > 3 ? 150 : 50);
             total += pay;
             highlight(l);
@@ -147,8 +157,9 @@ function finalize(lines) {
             type.innerText = "SLAIN!";
         }
         
-        cash.innerText = `+${Math.floor(total)} GOLD`;
-        animateCoins(Math.floor(total));
+        const finalReward = Math.floor(total);
+        cash.innerText = `+${finalReward} GOLD`;
+        animateCoins(finalReward);
         playSnd('win');
     } else {
         type.innerText = "FAILED";
@@ -156,17 +167,18 @@ function finalize(lines) {
         playSnd('lose');
     }
 
-    // Check for Game Over
     if (coins < 5 && lines.length === 0) {
         setTimeout(() => {
             type.innerText = "TOTAL DEFEAT";
-            cash.innerText = "Mission Failed. Quit to retry.";
+            cash.innerText = "Mission Failed.";
         }, 1000);
     }
 
     setTimeout(() => {
         busy = false;
-        if (coins >= 5) document.getElementById('spin-btn').classList.remove('hidden-btn');
+        if (coins >= 5) {
+            document.getElementById('spin-btn').classList.remove('hidden-btn');
+        }
     }, 2500);
 }
 
@@ -186,22 +198,23 @@ function highlight(l) {
 function animateCoins(amount) {
     let count = 0;
     let timer = setInterval(() => {
+        if (count >= amount) {
+            clearInterval(timer);
+            return;
+        }
         coins++;
         count++;
         updateUI();
-        if (count >= amount) clearInterval(timer);
     }, 30);
 }
 
 function updateUI() { 
-    document.getElementById('coins').innerText = coins; 
-}
-
-function shareGame() {
-    const text = `I am a Master Ninja with ${coins} gold in Shinobi Strike!`;
-    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`);
+    const el = document.getElementById('coins');
+    if (el) el.innerText = coins; 
 }
 
 window.onload = () => {
-    // Machine initialized via startGame
+    // Buttons are usually hooked in HTML, but good to have a backup
+    const btn = document.getElementById('spin-btn');
+    if(btn) btn.onclick = startSpin;
 };
