@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Tenchu Shinobi Slots</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="game-container">
+        <div class="header">
+            <div class="stat-box">COINS: <span id="coins">500</span></div>
+            <div class="stat-box">RANK: <span id="rank">NOVICE</span></div>
+        </div>
+
+        <div class="slot-machine">
+            <div class="reel" id="reel-0" onclick="stopReel(0)">
+                <div class="strip" id="strip-0"></div>
+            </div>
+            <div class="reel" id="reel-1" onclick="stopReel(1)">
+                <div class="strip" id="strip-1"></div>
+            </div>
+            <div class="reel" id="reel-2" onclick="stopReel(2)">
+                <div class="strip" id="strip-2"></div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button id="spin-btn" onclick="startSpin()">START MISSION</button>
+            <p id="message">READY FOR STEALTH...</p>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>
