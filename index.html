@@ -14,18 +14,23 @@
             <button onclick="playSnd('click'); startGame()">START MISSION</button>
             <button onclick="playSnd('click'); toggleInfo()">INSTRUCTIONS</button>
             <button class="share-btn" onclick="playSnd('click'); shareGame()">SHARE SCORE</button>
+            <button class="donate-btn" onclick="playSnd('click'); window.open('https://ko-fi.com/yourname')">DONATE</button>
         </div>
     </div>
 
     <div id="info-screen" class="screen hidden">
-        <h2>SCROLL OF RULES</h2>
+        <h2>MISSION BRIEFING</h2>
         <div class="rules-content">
-            <p>1. Tap SPIN to begin (5 Gold).</p>
-            <p>2. Tap each reel to STOP.</p>
-            <p>3. Match 3 Horizontal, Vertical, or Diagonal.</p>
-            <p>4. Symbol 6 pays the most!</p>
+            <p><strong>🎯 OBJECTIVE:</strong> Match symbols to earn gold and complete your mission.</p>
+            <p><strong>⚔️ COMBAT:</strong> Tap SPIN (5 Gold) to begin. Then tap each reel to STOP them in sequence.</p>
+            <p><strong>🎖️ VICTORY:</strong> Match 3 identical symbols horizontally, vertically, or diagonally.</p>
+            <p><strong>👺 ELITE TARGETS:</strong> Symbol 🏯 (6) pays the highest bounty!</p>
+            <p><strong>💰 REWARDS:</strong> Multiple matches multiply your gold. Big combos earn bonus multipliers!</p>
+            <p><strong>💀 DEFEAT:</strong> Running out of gold ends your mission.</p>
+            <p><strong>🎮 TIPS:</strong> Time your stops strategically. Watch for patterns!</p>
+            <p><strong>💾 PROGRESS:</strong> Your gold is saved automatically between missions.</p>
         </div>
-        <button onclick="playSnd('click'); toggleInfo()">BACK</button>
+        <button onclick="playSnd('click'); toggleInfo()">BACK TO BASE</button>
     </div>
 
     <div id="game-view" class="screen hidden">
@@ -46,14 +51,18 @@
         </div>
 
         <div class="game-footer">
-            <button id="spin-btn" onclick="startSpin()">SPIN</button>
+            <button id="spin-btn" onclick="startSpin()">SPIN (5 GOLD)</button>
             <div class="footer-btns">
-                <button class="mini-btn" onclick="window.open('https://ko-fi.com/yourname')">KO-FI</button>
-                <button class="mini-btn" onclick="location.reload()">QUIT</button>
+                <button class="mini-btn donate-btn" onclick="playSnd('click'); window.open('https://ko-fi.com/yourname')">DONATE</button>
+                <button class="mini-btn" onclick="playSnd('click'); location.reload()">ABORT MISSION</button>
             </div>
         </div>
     </div>
 
+    <!-- Particle effects container -->
+    <div class="particles" id="particles"></div>
+
+    <!-- Audio elements -->
     <audio id="snd-click" src="sounds/click.mp3"></audio>
     <audio id="snd-spin-start" src="sounds/spin.mp3"></audio>
     <audio id="snd-spinning" src="sounds/spinning.mp3" loop></audio>
