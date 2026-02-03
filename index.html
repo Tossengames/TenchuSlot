@@ -69,7 +69,7 @@
         <div class="game-header">
             <div class="stat">GOLD: <span id="coins">0</span></div>
             <div class="title-mini" id="mission-indicator">MISSION ACTIVE</div>
-            <div class="stat">POINTS: <span id="points">0</span></div>
+            <!-- Removed points display from header -->
         </div>
 
         <div class="slot-machine" id="machine">
@@ -111,8 +111,7 @@
             <div class="character-message" id="mission-failed-message"></div>
             <div id="mission-failed-details"></div>
             <div class="rank-change" id="failed-rank-change"></div>
-            <div class="game-over-buttons">
-                <button onclick="tryAgain()">TRY AGAIN</button>
+            <div class="game-over-buttons centered">
                 <button onclick="goToMainMenu()">BACK TO MENU</button>
             </div>
         </div>
