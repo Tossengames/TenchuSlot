@@ -1,105 +1,72 @@
 // ============================================
-// TENCHU: SHADOW MISSION - COMPLETE GAME SCRIPT
+// TENCHU: SHADOW MISSION - SIMPLIFIED VERSION
 // ============================================
 
 // --- GAME CONFIGURATION ---
 const SYMBOLS = 6;
 const EMOJIS = ['🥷', '🗡️', '🏮', '👺', '📜', '🏯'];
-const SYMBOL_NAMES = ['Rikimaru', 'Kodachi', 'Lantern', 'Oni Guard', 'Secret Scroll', 'Castle Lord'];
+const SYMBOL_NAMES = ['Ninja', 'Sword', 'Lantern', 'Oni', 'Scroll', 'Castle'];
 
-// Character Missions Database
-const MISSIONS = {
+// Character database
+const CHARACTERS = {
     rikimaru: {
         name: "Rikimaru",
-        color: "#3366cc",
         emoji: "🥷",
-        quote: "The Azure Dragon seeks justice in the shadows of Lord Mei-Oh's tyranny.",
-        objectives: [
-            { target: 100, text: "Gather 100 gold to fund Lord Gohda's resistance against the corrupt shogunate.", reward: 30 },
-            { target: 200, text: "Secure 200 gold to purchase intelligence on Lord Mei-Oh's hidden fortress.", reward: 50 },
-            { target: 300, text: "Amass 300 gold to rebuild Azuma village and shelter the displaced villagers.", reward: 80 }
-        ]
+        color: "#3366cc",
+        messages: [
+            "Lord Gohda needs funds for the resistance.",
+            "The Azure Dragon requires resources.",
+            "Azuma village needs gold to rebuild."
+        ],
+        goals: ["Get 50 gold", "Earn 80 gold", "Collect 100 gold"]
     },
     ayame: {
         name: "Ayame",
-        color: "#cc3366",
         emoji: "⚔️",
-        quote: "The Crimson Lily blooms where shadows fall, seeking vengeance for fallen comrades.",
-        objectives: [
-            { target: 80, text: "Collect 80 gold for medicine to heal wounded kunoichi from the last battle.", reward: 25 },
-            { target: 150, text: "Gather 150 gold to purchase rare poison ingredients from the black market.", reward: 40 },
-            { target: 250, text: "Secure 250 gold to fund the rescue of captured sisters from the Oni fortress.", reward: 65 }
-        ]
+        color: "#cc3366",
+        messages: [
+            "The Crimson Lily seeks resources for healing.",
+            "Wounded kunoichi need medicine.",
+            "Poison ingredients must be purchased."
+        ],
+        goals: ["Get 40 gold", "Earn 70 gold", "Collect 90 gold"]
     },
     tatsumaru: {
         name: "Tatsumaru",
-        color: "#33cc66",
         emoji: "👺",
-        quote: "The Green Viper strikes unseen, gathering resources to overthrow the corrupt lords.",
-        objectives: [
-            { target: 120, text: "Acquire 120 gold to bribe castle guards and gain access to restricted areas.", reward: 35 },
-            { target: 180, text: "Secure 180 gold for stealth gear, grappling hooks, and smoke bombs.", reward: 55 },
-            { target: 280, text: "Gather 280 gold to fund the rebellion and arm the peasant militia.", reward: 75 }
-        ]
+        color: "#33cc66",
+        messages: [
+            "The Green Viper needs funds for the rebellion.",
+            "Bribes are needed for castle access.",
+            "Stealth gear must be acquired."
+        ],
+        goals: ["Get 60 gold", "Earn 90 gold", "Collect 120 gold"]
     }
 };
 
 // Ranking System
 const RANKS = [
-    { name: "Initiate", minHonor: 0, color: "#666666", next: 100 },
-    { name: "Shinobi", minHonor: 100, color: "#3366cc", next: 300 },
-    { name: "Assassin", minHonor: 300, color: "#cc3366", next: 600 },
-    { name: "Shadow Master", minHonor: 600, color: "#9933cc", next: 1000 },
-    { name: "Grand Master", minHonor: 1000, color: "#ffcc00", next: 1500 }
+    { name: "INITIATE", minHonor: 0, color: "#666666" },
+    { name: "SHINOBI", minHonor: 100, color: "#3366cc" },
+    { name: "ASSASSIN", minHonor: 300, color: "#cc3366" },
+    { name: "SHADOW MASTER", minHonor: 600, color: "#9933cc" },
+    { name: "GRAND MASTER", minHonor: 1000, color: "#ffcc00" }
 ];
 
 // --- GAME STATE ---
-let coins = 50;
+let coins = 0;
 let honor = 0;
 let totalHonor = 0;
 let currentRank = 0;
-let currentCharacter = 'rikimaru';
-let currentMission = null;
-let currentObjective = 0;
-let missionsCompleted = 0;
-let totalMissions = 0;
+let currentCharacter = null;
+let currentGoal = "";
 let isSpinning = [false, false, false];
 let grid = [[], [], []];
 let busy = false;
-let gameActive = false;
 
 // --- SOUND SYSTEM ---
 function playSnd(id) {
-    // Create audio context for web audio
-    try {
-        if (typeof AudioContext !== 'undefined' || typeof webkitAudioContext !== 'undefined') {
-            const audioContext = new (AudioContext || webkitAudioContext)();
-            
-            // Different sounds for different actions
-            switch(id) {
-                case 'click':
-                    playBeep(800, 0.1);
-                    break;
-                case 'spin-start':
-                    playBeep(400, 0.2);
-                    break;
-                case 'stop':
-                    playBeep(600, 0.1);
-                    break;
-                case 'win':
-                    playWinSound();
-                    break;
-                case 'lose':
-                    playLoseSound();
-                    break;
-            }
-        }
-    } catch(e) {
-        console.log('Audio not supported');
-    }
-}
-
-function playBeep(frequency, duration) {
+    // Simple beep sounds
     try {
         const audioContext = new (AudioContext || webkitAudioContext)();
         const oscillator = audioContext.createOscillator();
@@ -107,6 +74,20 @@ function playBeep(frequency, duration) {
         
         oscillator.connect(gainNode);
         gainNode.connect(audioContext.destination);
+        
+        let frequency = 800;
+        let duration = 0.1;
+        
+        if (id === 'win') {
+            frequency = 523.25; // C5
+            duration = 0.3;
+        } else if (id === 'lose') {
+            frequency = 392; // G4
+            duration = 0.3;
+        } else if (id === 'spin') {
+            frequency = 400;
+            duration = 0.2;
+        }
         
         oscillator.frequency.value = frequency;
         oscillator.type = 'sine';
@@ -116,53 +97,9 @@ function playBeep(frequency, duration) {
         
         oscillator.start(audioContext.currentTime);
         oscillator.stop(audioContext.currentTime + duration);
-    } catch(e) {}
-}
-
-function playWinSound() {
-    try {
-        const audioContext = new (AudioContext || webkitAudioContext)();
-        const oscillator = audioContext.createOscillator();
-        const gainNode = audioContext.createGain();
-        
-        oscillator.connect(gainNode);
-        gainNode.connect(audioContext.destination);
-        
-        oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime); // C5
-        oscillator.frequency.setValueAtTime(659.25, audioContext.currentTime + 0.1); // E5
-        oscillator.frequency.setValueAtTime(783.99, audioContext.currentTime + 0.2); // G5
-        
-        oscillator.type = 'sine';
-        gainNode.gain.setValueAtTime(0, audioContext.currentTime);
-        gainNode.gain.linearRampToValueAtTime(0.3, audioContext.currentTime + 0.1);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
-        
-        oscillator.start(audioContext.currentTime);
-        oscillator.stop(audioContext.currentTime + 0.5);
-    } catch(e) {}
-}
-
-function playLoseSound() {
-    try {
-        const audioContext = new (AudioContext || webkitAudioContext)();
-        const oscillator = audioContext.createOscillator();
-        const gainNode = audioContext.createGain();
-        
-        oscillator.connect(gainNode);
-        gainNode.connect(audioContext.destination);
-        
-        oscillator.frequency.setValueAtTime(392, audioContext.currentTime); // G4
-        oscillator.frequency.setValueAtTime(349.23, audioContext.currentTime + 0.1); // F4
-        oscillator.frequency.setValueAtTime(293.66, audioContext.currentTime + 0.2); // D4
-        
-        oscillator.type = 'sine';
-        gainNode.gain.setValueAtTime(0, audioContext.currentTime);
-        gainNode.gain.linearRampToValueAtTime(0.2, audioContext.currentTime + 0.1);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
-        
-        oscillator.start(audioContext.currentTime);
-        oscillator.stop(audioContext.currentTime + 0.5);
-    } catch(e) {}
+    } catch(e) {
+        // Audio not supported
+    }
 }
 
 // --- SAVE/LOAD SYSTEM ---
@@ -171,38 +108,24 @@ function saveGame() {
         coins: coins,
         honor: honor,
         totalHonor: totalHonor,
-        currentCharacter: currentCharacter,
-        currentObjective: currentObjective,
-        missionsCompleted: missionsCompleted,
-        totalMissions: totalMissions,
         timestamp: Date.now()
     };
     
-    localStorage.setItem('tenchu_game_data', JSON.stringify(gameData));
-    showMessage('Mission log saved!', 'success');
+    localStorage.setItem('tenchu_simple_save', JSON.stringify(gameData));
+    updateRankDisplay();
 }
 
 function loadGame() {
-    const saved = localStorage.getItem('tenchu_game_data');
+    const saved = localStorage.getItem('tenchu_simple_save');
     if (saved) {
         try {
             const data = JSON.parse(saved);
-            coins = data.coins || 50;
+            coins = data.coins || 0;
             honor = data.honor || 0;
             totalHonor = data.totalHonor || 0;
-            currentCharacter = data.currentCharacter || 'rikimaru';
-            currentObjective = data.currentObjective || 0;
-            missionsCompleted = data.missionsCompleted || 0;
-            totalMissions = data.totalMissions || 0;
-            
-            currentMission = MISSIONS[currentCharacter];
             updateRank();
             updateUI();
-            updateMissionIndicator();
-            
-            console.log('Game loaded successfully');
         } catch(e) {
-            console.log('Error loading game:', e);
             resetGame();
         }
     } else {
@@ -211,118 +134,81 @@ function loadGame() {
 }
 
 function resetGame() {
-    coins = 50;
+    coins = 0;
     honor = 0;
     totalHonor = 0;
-    currentCharacter = 'rikimaru';
-    currentObjective = 0;
-    missionsCompleted = 0;
-    totalMissions = 0;
-    currentMission = MISSIONS[currentCharacter];
     updateRank();
     updateUI();
 }
 
 // --- RANK SYSTEM ---
 function updateRank() {
-    // Find current rank
     for (let i = RANKS.length - 1; i >= 0; i--) {
         if (honor >= RANKS[i].minHonor) {
             currentRank = i;
             break;
         }
     }
-    
-    // Update UI
+}
+
+function updateRankDisplay() {
     const rankElement = document.getElementById('current-rank');
-    const progressBar = document.getElementById('rank-progress-bar');
-    const totalHonorElement = document.getElementById('total-honor');
+    const honorElement = document.getElementById('total-honor');
+    const coinsElement = document.getElementById('saved-coins');
     
     if (rankElement) {
         rankElement.textContent = RANKS[currentRank].name;
         rankElement.style.color = RANKS[currentRank].color;
     }
     
-    if (progressBar) {
-        const currentRankHonor = RANKS[currentRank].minHonor;
-        const nextRankHonor = RANKS[currentRank].next;
-        const progress = ((honor - currentRankHonor) / (nextRankHonor - currentRankHonor)) * 100;
-        progressBar.style.width = Math.min(100, Math.max(0, progress)) + '%';
-    }
-    
-    if (totalHonorElement) {
-        totalHonorElement.textContent = totalHonor;
-    }
+    if (honorElement) honorElement.textContent = honor;
+    if (coinsElement) coinsElement.textContent = coins;
 }
 
-// --- NAVIGATION ---
-function showMissionSelect() {
-    playSnd('click');
-    document.getElementById('main-menu').classList.add('hidden');
-    document.getElementById('mission-select').classList.remove('hidden');
-}
-
-function selectCharacter(char) {
-    playSnd('click');
-    currentCharacter = char;
-    currentMission = MISSIONS[char];
-    currentObjective = 0;
-    showMissionBriefing();
-}
-
-function showMissionBriefing() {
-    if (!currentMission) return;
-    
-    playSnd('click');
-    document.getElementById('mission-select').classList.add('hidden');
-    const briefing = document.getElementById('mission-briefing');
-    briefing.classList.remove('hidden');
-    
-    // Update character info
-    document.getElementById('character-name').textContent = currentMission.name;
-    document.getElementById('character-quote').textContent = currentMission.quote;
-    document.getElementById('character-portrait').textContent = currentMission.emoji;
-    document.getElementById('character-portrait').className = `character-portrait ${currentCharacter}-color`;
-    
-    // Update mission objective
-    const objective = currentMission.objectives[currentObjective];
-    document.getElementById('mission-text').textContent = objective.text;
-    document.getElementById('reward-gold').textContent = `${objective.target} GOLD`;
-    document.getElementById('reward-honor').textContent = `${objective.reward} HONOR`;
-    
-    // Update next rank
-    const nextRank = currentRank < RANKS.length - 1 ? RANKS[currentRank + 1].name : "MAX RANK";
-    document.getElementById('next-rank').textContent = nextRank;
-}
-
+// --- MISSION SYSTEM ---
 function startMission() {
     playSnd('click');
-    if (!currentCharacter) {
-        currentCharacter = 'rikimaru';
-        currentMission = MISSIONS[currentCharacter];
-    }
     
-    document.getElementById('mission-briefing').classList.add('hidden');
-    document.getElementById('mission-select').classList.add('hidden');
-    startGame();
+    // Random character
+    const chars = Object.keys(CHARACTERS);
+    currentCharacter = chars[Math.floor(Math.random() * chars.length)];
+    const char = CHARACTERS[currentCharacter];
+    
+    // Random message and goal
+    const randomMessage = char.messages[Math.floor(Math.random() * char.messages.length)];
+    const randomGoal = char.goals[Math.floor(Math.random() * char.goals.length)];
+    currentGoal = randomGoal;
+    
+    // Random starting coins (15-30)
+    coins = 15 + Math.floor(Math.random() * 16);
+    
+    // Update briefing
+    document.getElementById('character-message').textContent = 
+        `${char.emoji} ${char.name}: "${randomMessage}"`;
+    document.getElementById('character-goal').textContent = 
+        `Goal: ${randomGoal}`;
+    
+    // Show briefing
+    document.getElementById('main-menu').classList.add('hidden');
+    document.getElementById('mission-briefing').classList.remove('hidden');
+    
+    // Update UI
+    updateUI();
 }
 
 function startGame() {
     playSnd('click');
-    document.getElementById('main-menu').classList.add('hidden');
+    document.getElementById('mission-briefing').classList.add('hidden');
     document.getElementById('game-view').classList.remove('hidden');
-    gameActive = true;
     
     updateMissionIndicator();
     initMachine();
+    saveGame();
 }
 
 function showInstructions() {
     playSnd('click');
-    const currentScreen = document.querySelector('.screen:not(.hidden)');
-    if (currentScreen) {
-        currentScreen.classList.add('hidden');
-    }
+    document.getElementById('main-menu').classList.add('hidden');
     document.getElementById('info-screen').classList.remove('hidden');
 }
 
@@ -333,24 +219,20 @@ function goToMainMenu() {
         currentScreen.classList.add('hidden');
     }
     document.getElementById('main-menu').classList.remove('hidden');
-}
-
-function goToMissionSelect() {
-    playSnd('click');
-    document.getElementById('mission-briefing').classList.add('hidden');
-    document.getElementById('mission-select').classList.remove('hidden');
+    updateRankDisplay();
 }
 
 function returnToBase() {
     playSnd('click');
-    if (gameActive) {
-        saveGame();
-    }
-    
+    saveGame();
     document.getElementById('game-view').classList.add('hidden');
-    document.getElementById('mission-complete').classList.add('hidden');
     document.getElementById('main-menu').classList.remove('hidden');
-    gameActive = false;
+    updateRankDisplay();
+}
+
+function donate() {
+    playSnd('click');
+    window.open('https://ko-fi.com', '_blank');
 }
 
 // --- GAME ENGINE ---
@@ -377,11 +259,10 @@ function createSym(id) {
 }
 
 function updateMissionIndicator() {
-    if (!currentMission) return;
     const indicator = document.getElementById('mission-indicator');
-    const objective = currentMission.objectives[currentObjective];
-    const progress = Math.min(coins, objective.target);
-    indicator.textContent = `${currentMission.name}: ${progress}/${objective.target}`;
+    if (currentCharacter && currentGoal) {
+        indicator.textContent = `${CHARACTERS[currentCharacter].name}: ${currentGoal}`;
+    }
 }
 
 // --- SPIN SYSTEM ---
@@ -397,7 +278,7 @@ function startSpin() {
     // Deduct spin cost
     coins -= 5;
     updateUI();
-    playSnd('spin-start');
+    playSnd('spin');
     
     // Start all reels spinning
     for (let i = 0; i < 3; i++) {
@@ -416,13 +297,13 @@ function startSpin() {
 function stopReel(i) {
     if (!isSpinning[i]) return;
     
-    playSnd('stop');
+    playSnd('click');
     isSpinning[i] = false;
     
     const strip = document.getElementById(`strip-${i}`);
     strip.classList.remove('spinning');
     
-    // Generate new symbols for this reel
+    // Generate new symbols
     grid[i] = [
         Math.floor(Math.random() * SYMBOLS) + 1,
         Math.floor(Math.random() * SYMBOLS) + 1,
@@ -446,14 +327,14 @@ function checkResult() {
     let lines = [];
     const g = grid;
     
-    // Horizontal lines (rows)
+    // Horizontal lines
     for (let row = 0; row < 3; row++) {
         if (g[0][row] === g[1][row] && g[1][row] === g[2][row]) {
             lines.push({type: 'h', row: row, symbol: g[0][row]});
         }
     }
     
-    // Vertical lines (columns)
+    // Vertical lines
     for (let col = 0; col < 3; col++) {
         if (g[col][0] === g[col][1] && g[col][1] === g[col][2]) {
             lines.push({type: 'v', col: col, symbol: g[col][0]});
@@ -490,7 +371,7 @@ function highlightLine(line) {
         
         if (target) {
             target.classList.add('winning-symbol');
-            createBloodParticles(3, target);
+            createParticles(3, target);
         }
     }
 }
@@ -499,35 +380,34 @@ function finalize(lines) {
     const panel = document.getElementById('result-panel');
     const type = document.getElementById('res-type');
     const cash = document.getElementById('res-coins');
-    const missionUpdate = document.getElementById('mission-update');
     
     panel.classList.remove('hidden');
-    playSnd(lines.length > 0 ? 'win' : 'lose');
     
     if (lines.length > 0) {
         let total = 0;
         
-        // Calculate rewards for each winning line
+        // Calculate rewards
         lines.forEach(line => {
             let reward = 0;
+            // Character symbols (1, 2, 3) pay more
             switch(line.symbol) {
                 case 1: // Ninja
                     reward = 30;
                     break;
-                case 4: // Oni
+                case 2: // Sword Master (character)
+                    reward = 20;
+                    break;
+                case 3: // Oni (character)
                     reward = 25;
                     break;
-                case 6: // Castle (MAX)
-                    reward = 50;
-                    break;
-                case 2: // Sword
-                    reward = 15;
-                    break;
-                case 3: // Lantern
+                case 4: // Lantern (item)
                     reward = 10;
                     break;
-                case 5: // Scroll
+                case 5: // Scroll (item)
                     reward = 8;
+                    break;
+                case 6: // Castle (special)
+                    reward = 15;
                     break;
                 default:
                     reward = 10;
@@ -538,35 +418,18 @@ function finalize(lines) {
         
         // Multi-line bonus
         if (lines.length > 1) {
-            type.textContent = "MULTI-KILL!";
-            type.style.color = "#ff0000";
+            type.textContent = "BIG WIN!";
             total = Math.floor(total * 1.3);
-            createScreenShake();
         } else {
-            type.textContent = "TARGET ELIMINATED!";
-            type.style.color = "#ff3300";
+            type.textContent = "WIN!";
         }
         
         // Cap at maximum
         const finalReward = Math.min(50, total);
-        cash.textContent = `+${finalReward} RYŌ`;
-        cash.style.color = "#ffcc00";
+        cash.textContent = `+${finalReward} GOLD`;
         
         // Add coins with animation
-        const oldCoins = coins;
-        animateCoins(finalReward, () => {
-            // Check mission objective
-            if (currentMission) {
-                const objective = currentMission.objectives[currentObjective];
-                
-                // Check if objective completed
-                if (oldCoins < objective.target && coins >= objective.target) {
-                    completeObjective();
-                } else {
-                    missionUpdate.innerHTML = `<span style="color:#00ff00">Objective: ${coins}/${objective.target} Gold</span>`;
-                }
-            }
-        });
+        animateCoins(finalReward);
         
         // Add honor for win
         const honorGain = Math.floor(finalReward / 5);
@@ -574,23 +437,18 @@ function finalize(lines) {
         totalHonor += honorGain;
         updateRank();
         
+        playSnd('win');
+        
     } else {
-        type.textContent = "MISSED!";
-        type.style.color = "#666666";
-        cash.textContent = "Target escaped...";
-        cash.style.color = "#999999";
-        missionUpdate.textContent = "";
+        type.textContent = "FAILED";
+        cash.textContent = "No matches";
+        playSnd('lose');
         
         // Check if out of coins
         if (coins < 5) {
             setTimeout(() => {
-                type.textContent = "MISSION FAILED";
-                cash.textContent = "Out of resources...";
-                missionUpdate.innerHTML = `<span style="color:#ff3300">Returning to base camp...</span>`;
-                
-                setTimeout(() => {
-                    returnToBase();
-                }, 2000);
+                type.textContent = "GAME OVER";
+                cash.textContent = "No gold left";
             }, 1000);
         }
     }
@@ -601,72 +459,19 @@ function finalize(lines) {
         if (coins >= 5) {
             document.getElementById('spin-btn').classList.remove('hidden-btn');
         }
+        saveGame();
     }, 2000);
 }
 
-function completeObjective() {
-    if (!currentMission) return;
-    
-    const objective = currentMission.objectives[currentObjective];
-    const honorReward = objective.reward;
-    
-    // Award honor
-    honor += honorReward;
-    totalHonor += honorReward;
-    missionsCompleted++;
-    totalMissions++;
-    
-    // Save progress
-    saveGame();
-    updateRank();
-    
-    // Show mission complete screen
-    const completeScreen = document.getElementById('mission-complete');
-    const missionResult = document.getElementById('mission-result');
-    const missionReward = document.getElementById('mission-reward');
-    
-    missionResult.innerHTML = `
-        <div style="color: ${currentMission.color}; font-size: 2rem; margin-bottom: 10px;">
-            ${currentMission.name}'s Mission Complete!
-        </div>
-        <div style="font-size: 1.2rem;">
-            "${objective.text}"
-        </div>
-    `;
-    
-    missionReward.textContent = `+${honorReward} Honor Earned!`;
-    
-    completeScreen.classList.remove('hidden');
-    
-    // Check if there are more objectives
-    if (currentObjective < currentMission.objectives.length - 1) {
-        currentObjective++;
-    } else {
-        // All objectives completed for this character
-        setTimeout(() => {
-            missionResult.innerHTML += `<div style="color: #ffcc00; margin-top: 20px; font-size: 1.5rem;">
-                All missions completed for ${currentMission.name}!
-            </div>`;
-        }, 1000);
-    }
-}
-
-function continueMission() {
-    playSnd('click');
-    document.getElementById('mission-complete').classList.add('hidden');
-    updateMissionIndicator();
-}
-
 // --- ANIMATIONS ---
-function animateCoins(amount, callback) {
-    const steps = 5;
+function animateCoins(amount) {
+    const steps = 3;
     const stepValue = Math.ceil(amount / steps);
     let count = 0;
     
     const timer = setInterval(() => {
         if (count >= amount) {
             clearInterval(timer);
-            if (callback) callback();
             saveGame();
             return;
         }
@@ -688,10 +493,10 @@ function animateCoins(amount, callback) {
             coinElement.classList.remove('coin-bounce');
         }, 200);
         
-    }, 80);
+    }, 100);
 }
 
-function createBloodParticles(count, element) {
+function createParticles(count, element) {
     const particles = document.getElementById('particles');
     const rect = element.getBoundingClientRect();
     
@@ -719,22 +524,11 @@ function createBloodParticles(count, element) {
     }
 }
 
-function createScreenShake() {
-    const gameView = document.getElementById('game-view');
-    gameView.classList.add('screen-shake');
-    setTimeout(() => {
-        gameView.classList.remove('screen-shake');
-    }, 500);
-}
-
 // --- UI UPDATES ---
 function updateUI() {
-    // Update coin display
-    const coinElement = document.getElementById('coins');
-    const honorElement = document.getElementById('honor');
-    
-    if (coinElement) coinElement.textContent = coins;
-    if (honorElement) honorElement.textContent = honor;
+    // Update displays
+    document.getElementById('coins').textContent = coins;
+    document.getElementById('honor').textContent = honor;
     
     // Update spin button state
     const spinBtn = document.getElementById('spin-btn');
@@ -742,86 +536,27 @@ function updateUI() {
         if (coins < 5) {
             spinBtn.disabled = true;
             spinBtn.style.opacity = '0.5';
-            spinBtn.title = 'Need 5 ryō to infiltrate';
         } else {
             spinBtn.disabled = false;
             spinBtn.style.opacity = '1';
-            spinBtn.title = 'Begin infiltration (5 ryō)';
         }
     }
-    
-    updateMissionIndicator();
-}
-
-// --- UTILITY FUNCTIONS ---
-function shareGame() {
-    playSnd('click');
-    const shareText = `I have achieved the rank of ${RANKS[currentRank].name} with ${totalHonor} total honor in TENCHU: Shadow Mission! Can you surpass my shadow? 🥷`;
-    
-    if (navigator.share) {
-        navigator.share({
-            title: 'TENCHU: Shadow Mission',
-            text: shareText,
-            url: window.location.href
-        });
-    } else {
-        navigator.clipboard.writeText(shareText);
-        showMessage('Honor record copied to scroll!', 'info');
-    }
-}
-
-function donate() {
-    playSnd('click');
-    window.open('https://ko-fi.com', '_blank');
-}
-
-function showMessage(text, type) {
-    // Create message element
-    const message = document.createElement('div');
-    message.textContent = text;
-    message.style.position = 'fixed';
-    message.style.top = '20px';
-    message.style.left = '50%';
-    message.style.transform = 'translateX(-50%)';
-    message.style.padding = '10px 20px';
-    message.style.background = type === 'success' ? 'rgba(0, 153, 0, 0.9)' : 'rgba(153, 0, 0, 0.9)';
-    message.style.color = 'white';
-    message.style.borderRadius = '5px';
-    message.style.zIndex = '1000';
-    message.style.fontFamily = 'Georgia, serif';
-    message.style.boxShadow = '0 2px 10px rgba(0,0,0,0.3)';
-    
-    document.body.appendChild(message);
-    
-    // Remove after 3 seconds
-    setTimeout(() => {
-        message.style.opacity = '0';
-        message.style.transition = 'opacity 0.5s';
-        setTimeout(() => {
-            document.body.removeChild(message);
-        }, 500);
-    }, 3000);
 }
 
 // --- INITIALIZATION ---
 window.onload = function() {
     // Load saved game
     loadGame();
+    updateRankDisplay();
     
-    // Set up auto-save
-    setInterval(saveGame, 30000); // Save every 30 seconds
-    
-    // Show welcome message
-    setTimeout(() => {
-        if (!localStorage.getItem('tenchu_game_data')) {
-            showMessage('Welcome to TENCHU: Shadow Mission! Your progress is saved automatically.', 'info');
-        }
-    }, 1000);
+    // Auto-save every minute
+    setInterval(saveGame, 60000);
 };
 
 // --- KEYBOARD CONTROLS ---
 document.addEventListener('keydown', function(e) {
-    if (!gameActive) return;
+    const gameView = document.getElementById('game-view');
+    if (!gameView || gameView.classList.contains('hidden')) return;
     
     switch(e.key) {
         case ' ':
@@ -844,12 +579,7 @@ document.addEventListener('keydown', function(e) {
     }
 });
 
-// Prevent right-click context menu
+// Prevent right-click
 document.addEventListener('contextmenu', function(e) {
-    e.preventDefault();
-});
-
-// Prevent text selection
-document.addEventListener('selectstart', function(e) {
     e.preventDefault();
 });
