@@ -64,9 +64,9 @@ body {
     margin-bottom: 5px;
 }
 
-.rank-stats {
+.rank-points {
     color: #ccc;
-    font-size: 1rem;
+    font-size: 1.1rem;
 }
 
 /* Game header */
@@ -112,18 +112,18 @@ body {
     50% { transform: scale(1.2); color: #ffcc00; }
 }
 
-/* Result Panel - BELOW slots, not covering them */
+/* Result Panel - BELOW slots */
 #result-panel {
     width: 80%;
     max-width: 400px;
     height: auto;
-    min-height: 120px;
+    min-height: 100px;
     background: rgba(26, 0, 0, 0.95);
     border: 3px solid var(--crimson);
     border-radius: 15px;
     padding: 15px;
     margin-top: 20px;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
     box-shadow: 
         0 0 30px rgba(255, 51, 0, 0.7),
         inset 0 0 20px rgba(153, 0, 0, 0.3);
@@ -244,9 +244,20 @@ button:disabled {
     display: flex; 
     justify-content: center; 
     align-items: center; 
-    font-size: 3.5rem; 
     background: rgba(0,0,0,0.3);
+    position: relative;
+}
+
+.symbol-img {
+    width: 80%;
+    height: 80%;
+    object-fit: contain;
+}
+
+.symbol-emoji {
+    font-size: 3.5rem;
     text-shadow: 0 0 10px rgba(255,51,0,0.5);
+    display: none;
 }
 
 .spinning { 
@@ -316,15 +327,6 @@ button:disabled {
     color: #ffcc00;
     margin: 20px 0;
     font-style: italic;
-}
-
-.character-goal {
-    font-size: 1.1rem;
-    color: #fff;
-    margin: 15px 0;
-    padding: 10px;
-    background: rgba(153,0,0,0.2);
-    border-radius: 10px;
 }
 
 /* Instructions */
@@ -399,6 +401,9 @@ button:disabled {
     
     .symbol {
         height: 80px;
+    }
+    
+    .symbol-emoji {
         font-size: 2.5rem;
     }
     
