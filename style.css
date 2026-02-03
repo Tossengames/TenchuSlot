@@ -3,8 +3,6 @@
     --crimson: #ff3300;
     --gold: #ffcc00;
     --shadow: #1a0000;
-    --ninja-black: #0a0a0a;
-    --scroll-paper: #fff8e1;
 }
 
 body {
@@ -13,9 +11,6 @@ body {
     margin: 0;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     overflow: hidden;
-    background-image: 
-        radial-gradient(circle at 20% 80%, rgba(255, 51, 0, 0.1) 0%, transparent 50%),
-        radial-gradient(circle at 80% 20%, rgba(153, 0, 0, 0.1) 0%, transparent 50%);
 }
 
 .screen {
@@ -43,7 +38,7 @@ body {
     display: none !important; 
 }
 
-/* Ninja Scroll Title */
+/* Ninja Title */
 .glitch-title {
     font-size: 3.5rem;
     color: var(--crimson);
@@ -52,25 +47,26 @@ body {
         0 0 20px #660000,
         2px 2px 0 #000;
     font-family: 'Georgia', serif;
-    margin-bottom: 30px;
+    margin-bottom: 10px;
     letter-spacing: 3px;
-    position: relative;
 }
 
-.glitch-title::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 51, 0, 0.1), transparent);
-    animation: scrollGlow 3s infinite;
+/* Rank display below title */
+.rank-container {
+    margin-bottom: 30px;
+    text-align: center;
 }
 
-@keyframes scrollGlow {
-    0%, 100% { transform: translateX(-100%); }
-    50% { transform: translateX(100%); }
+.rank-name {
+    color: #ffcc00;
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.rank-stats {
+    color: #ccc;
+    font-size: 1rem;
 }
 
 /* Game header */
@@ -116,43 +112,40 @@ body {
     50% { transform: scale(1.2); color: #ffcc00; }
 }
 
-/* Result Panel */
+/* Result Panel - BELOW slots, not covering them */
 #result-panel {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
     width: 80%;
     max-width: 400px;
     height: auto;
-    min-height: 200px;
+    min-height: 120px;
     background: rgba(26, 0, 0, 0.95);
     border: 3px solid var(--crimson);
     border-radius: 15px;
-    padding: 25px;
+    padding: 15px;
+    margin-top: 20px;
+    margin-bottom: 20px;
     box-shadow: 
-        0 0 50px rgba(255, 51, 0, 0.7),
-        inset 0 0 30px rgba(153, 0, 0, 0.3);
-    z-index: 20;
+        0 0 30px rgba(255, 51, 0, 0.7),
+        inset 0 0 20px rgba(153, 0, 0, 0.3);
+    z-index: 2;
     display: flex; 
     flex-direction: column; 
     justify-content: center; 
     align-items: center;
-    text-align: center;
 }
 
 #res-type { 
     color: var(--crimson); 
-    font-size: 2rem;
-    margin: 10px 0; 
+    font-size: 1.8rem;
+    margin: 5px 0; 
     text-shadow: 0 0 10px var(--blood);
     font-family: 'Georgia', serif;
 }
 
 #res-coins {
-    font-size: 1.8rem;
+    font-size: 1.5rem;
     color: #ffcc00;
-    margin: 15px 0;
+    margin: 5px 0;
 }
 
 /* Buttons */
@@ -219,7 +212,6 @@ button:disabled {
     border: 3px solid #444; 
     position: relative; 
     margin-top: 100px;
-    margin-bottom: 30px;
     border-radius: 10px;
     z-index: 2;
 }
@@ -298,6 +290,7 @@ button:disabled {
     align-items: center;
     gap: 15px;
     z-index: 2;
+    margin-top: 10px;
 }
 
 .footer-btns {
@@ -307,176 +300,68 @@ button:disabled {
     justify-content: center;
 }
 
-/* Mission screens */
-.mission-screen {
+/* Mission Briefing */
+.mission-briefing {
     background: rgba(0,0,0,0.95);
     border: 3px solid var(--crimson);
     border-radius: 15px;
     padding: 25px;
-    max-width: 600px;
-    max-height: 80vh;
-    overflow-y: auto;
+    max-width: 500px;
     margin: 20px;
-}
-
-.mission-title {
-    color: var(--crimson);
-    font-size: 2.5rem;
-    margin-bottom: 20px;
-    text-shadow: 0 0 10px var(--blood);
-    font-family: 'Georgia', serif;
-}
-
-.mission-character {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    margin: 20px 0;
-    padding: 15px;
-    background: rgba(26,0,0,0.5);
-    border-radius: 10px;
-    border-left: 4px solid var(--crimson);
-    cursor: pointer;
-    transition: transform 0.3s ease;
-}
-
-.mission-character:hover {
-    transform: translateX(10px);
-    background: rgba(26,0,0,0.7);
-}
-
-.character-portrait {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    border: 3px solid var(--crimson);
-    background: #000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 2rem;
-}
-
-.character-info {
-    text-align: left;
-    flex: 1;
-}
-
-.character-name {
-    color: var(--crimson);
-    font-size: 1.5rem;
-    margin-bottom: 5px;
-}
-
-.character-quote {
-    color: #ccc;
-    font-style: italic;
-    font-size: 0.9rem;
-}
-
-.mission-objective {
-    background: rgba(255,255,255,0.05);
-    padding: 20px;
-    border-radius: 10px;
-    margin: 20px 0;
-    border: 2px solid rgba(255,51,0,0.3);
-}
-
-.objective-title {
-    color: #ffcc00;
-    font-size: 1.3rem;
-    margin-bottom: 10px;
-}
-
-.objective-text {
-    font-size: 1.1rem;
-    line-height: 1.6;
-}
-
-.mission-rewards {
-    display: flex;
-    justify-content: space-around;
-    margin: 20px 0;
-    flex-wrap: wrap;
-    gap: 15px;
-}
-
-.reward-item {
     text-align: center;
+}
+
+.character-message {
+    font-size: 1.2rem;
+    color: #ffcc00;
+    margin: 20px 0;
+    font-style: italic;
+}
+
+.character-goal {
+    font-size: 1.1rem;
+    color: #fff;
+    margin: 15px 0;
     padding: 10px;
-    min-width: 120px;
+    background: rgba(153,0,0,0.2);
+    border-radius: 10px;
 }
 
-.reward-icon {
-    font-size: 2rem;
-    margin-bottom: 5px;
-}
-
+/* Instructions */
 .rules-content {
     background: rgba(26, 0, 0, 0.7);
     border: 1px solid var(--crimson);
     border-radius: 10px;
-    padding: 25px;
-    margin: 20px 0;
+    padding: 20px;
+    margin: 20px;
+    max-width: 500px;
     text-align: left;
-    max-height: 50vh;
+    max-height: 60vh;
     overflow-y: auto;
 }
 
 .rules-content h3 {
     color: var(--crimson);
-    margin-top: 20px;
+    margin-top: 15px;
     border-bottom: 1px solid var(--crimson);
     padding-bottom: 5px;
 }
 
 .rules-content p {
-    margin: 12px 0;
-    line-height: 1.6;
+    margin: 10px 0;
+    line-height: 1.5;
 }
 
-.rules-content ul {
-    margin: 15px 0;
-    padding-left: 20px;
+/* Screen shake */
+.screen-shake {
+    animation: screenShake 0.5s ease;
 }
 
-.rules-content li {
-    margin: 8px 0;
-}
-
-/* Rank Display */
-.rank-display {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    background: rgba(26,0,0,0.7);
-    padding: 10px 20px;
-    border-radius: 20px;
-    border: 2px solid var(--crimson);
-    text-align: center;
-    z-index: 5;
-    min-width: 150px;
-}
-
-.rank-name {
-    color: #ffcc00;
-    font-size: 1.2rem;
-    font-weight: bold;
-}
-
-.rank-progress {
-    height: 5px;
-    background: #333;
-    border-radius: 3px;
-    margin-top: 5px;
-    overflow: hidden;
-}
-
-.rank-progress-bar {
-    height: 100%;
-    background: linear-gradient(to right, var(--blood), var(--crimson));
-    width: 0%;
-    transition: width 0.5s ease;
+@keyframes screenShake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    50% { transform: translateX(5px); }
+    75% { transform: translateX(-5px); }
 }
 
 /* Particle effects */
@@ -500,63 +385,6 @@ button:disabled {
     opacity: 0.8;
     box-shadow: 0 0 10px #ff3300;
 }
-
-/* Screen shake */
-.screen-shake {
-    animation: screenShake 0.5s ease;
-}
-
-@keyframes screenShake {
-    0%, 100% { transform: translateX(0); }
-    25% { transform: translateX(-5px); }
-    50% { transform: translateX(5px); }
-    75% { transform: translateX(-5px); }
-}
-
-/* Blood Drip Animation */
-.blood-drip {
-    position: absolute;
-    width: 2px;
-    height: 20px;
-    background: var(--crimson);
-    border-radius: 0 0 2px 2px;
-    animation: drip 2s linear infinite;
-    opacity: 0.7;
-    z-index: 4;
-}
-
-@keyframes drip {
-    0% { transform: translateY(-20px); opacity: 0; }
-    10% { opacity: 1; }
-    90% { opacity: 1; }
-    100% { transform: translateY(100px); opacity: 0; }
-}
-
-/* Mission Complete Animation */
-.mission-complete {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.9);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    z-index: 100;
-    animation: fadeIn 0.5s ease;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-/* Character Colors */
-.rikimaru-color { background: #3366cc; }
-.ayame-color { background: #cc3366; }
-.tatsumaru-color { background: #33cc66; }
 
 /* Responsive */
 @media (max-width: 768px) {
@@ -594,5 +422,10 @@ button:disabled {
     button {
         width: 220px;
         padding: 12px 20px;
+    }
+    
+    .mission-briefing {
+        padding: 15px;
+        margin: 10px;
     }
 }
