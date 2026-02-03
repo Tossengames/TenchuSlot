@@ -16,10 +16,7 @@
         <!-- Rank display below title -->
         <div class="rank-container">
             <div class="rank-name" id="current-rank">INITIATE</div>
-            <div class="rank-stats">
-                Honor: <span id="total-honor">0</span> | 
-                Gold: <span id="saved-coins">0</span>
-            </div>
+            <div class="rank-points">POINTS: <span id="total-points">0</span></div>
         </div>
         
         <div class="menu-btns">
@@ -32,7 +29,7 @@
     <!-- Mission Briefing -->
     <div id="mission-briefing" class="screen hidden">
         <div class="mission-briefing">
-            <h2 id="briefing-title">MISSION BRIEFING</h2>
+            <h2>MISSION BRIEFING</h2>
             <div class="character-message" id="character-message"></div>
             <div class="character-goal" id="character-goal"></div>
             <button onclick="startGame()">BEGIN MISSION</button>
@@ -51,20 +48,16 @@
                 <p>3. Match 3 symbols to win</p>
                 
                 <h3>SYMBOL VALUES</h3>
-                <p>Characters pay more than items:</p>
-                <p>🥷 Ninja: 30 gold</p>
-                <p>👺 Oni: 25 gold</p>
-                <p>⚔️ Sword Master: 20 gold</p>
-                <p>🏯 Castle: 15 gold</p>
-                <p>🏮 Lantern: 10 gold</p>
-                <p>📜 Scroll: 8 gold</p>
+                <p>Matching character symbols gives more points.</p>
+                <p>Character symbols (1, 2, 3) give more points than items.</p>
                 
-                <h3>MULTIPLE WINS</h3>
-                <p>Get multiple matches to earn bonus rewards!</p>
+                <h3>RANKING SYSTEM</h3>
+                <p>Earn points to increase your rank.</p>
+                <p>Lose points if you fail missions or quit.</p>
+                <p>Ranks: INITIATE → SHINOBI → ASSASSIN → SHADOW MASTER → GRAND MASTER</p>
                 
-                <h3>RANKING</h3>
-                <p>Earn honor points to rank up from Initiate to Grand Master.</p>
-                <p>Your progress is saved automatically.</p>
+                <h3>SAVING</h3>
+                <p>Your rank and points are saved automatically.</p>
             </div>
             <button onclick="goToMainMenu()">BACK</button>
         </div>
@@ -75,7 +68,7 @@
         <div class="game-header">
             <div class="stat">GOLD: <span id="coins">0</span></div>
             <div class="title-mini" id="mission-indicator">MISSION ACTIVE</div>
-            <div class="stat">HONOR: <span id="honor">0</span></div>
+            <div class="stat">POINTS: <span id="points">0</span></div>
         </div>
 
         <div class="slot-machine" id="machine">
@@ -93,7 +86,6 @@
         <div class="game-footer">
             <button id="spin-btn" onclick="startSpin()">SPIN (5 GOLD)</button>
             <div class="footer-btns">
-                <button class="mini-btn" onclick="showInstructions()">HELP</button>
                 <button class="mini-btn" onclick="returnToBase()">END MISSION</button>
             </div>
         </div>
