@@ -1,5 +1,5 @@
 // ============================================
-// TENCHU: SHADOW MISSION - SIMPLIFIED VERSION
+// TENCHU: SHADOW MISSION - FINAL VERSION
 // ============================================
 
 // --- GAME CONFIGURATION ---
@@ -12,61 +12,69 @@ const CHARACTERS = {
     rikimaru: {
         name: "Rikimaru",
         emoji: "🥷",
-        color: "#3366cc",
         messages: [
-            "Lord Gohda needs funds for the resistance.",
-            "The Azure Dragon requires resources.",
-            "Azuma village needs gold to rebuild."
-        ],
-        goals: ["Get 50 gold", "Earn 80 gold", "Collect 100 gold"]
+            "The Azure Dragon needs your help.",
+            "Lord Gohda requires your service.",
+            "Azuma village is counting on you."
+        ]
     },
     ayame: {
         name: "Ayame",
         emoji: "⚔️",
-        color: "#cc3366",
         messages: [
-            "The Crimson Lily seeks resources for healing.",
-            "Wounded kunoichi need medicine.",
-            "Poison ingredients must be purchased."
-        ],
-        goals: ["Get 40 gold", "Earn 70 gold", "Collect 90 gold"]
+            "The Crimson Lily needs assistance.",
+            "Our sisters require your aid.",
+            "Help us gather what we need."
+        ]
     },
     tatsumaru: {
         name: "Tatsumaru",
         emoji: "👺",
-        color: "#33cc66",
         messages: [
-            "The Green Viper needs funds for the rebellion.",
-            "Bribes are needed for castle access.",
-            "Stealth gear must be acquired."
-        ],
-        goals: ["Get 60 gold", "Earn 90 gold", "Collect 120 gold"]
+            "The Green Viper seeks your help.",
+            "Join our cause, shinobi.",
+            "We need resources for the rebellion."
+        ]
     }
 };
 
-// Ranking System
+// Ranking System - Points based
 const RANKS = [
-    { name: "INITIATE", minHonor: 0, color: "#666666" },
-    { name: "SHINOBI", minHonor: 100, color: "#3366cc" },
-    { name: "ASSASSIN", minHonor: 300, color: "#cc3366" },
-    { name: "SHADOW MASTER", minHonor: 600, color: "#9933cc" },
-    { name: "GRAND MASTER", minHonor: 1000, color: "#ffcc00" }
+    { name: "INITIATE", minPoints: 0, color: "#666666" },
+    { name: "SHINOBI", minPoints: 50, color: "#3366cc" },
+    { name: "ASSASSIN", minPoints: 150, color: "#cc3366" },
+    { name: "SHADOW MASTER", minPoints: 300, color: "#9933cc" },
+    { name: "GRAND MASTER", minPoints: 500, color: "#ffcc00" }
 ];
 
 // --- GAME STATE ---
 let coins = 0;
-let honor = 0;
-let totalHonor = 0;
+let points = 0;
+let totalPoints = 0;
 let currentRank = 0;
 let currentCharacter = null;
-let currentGoal = "";
+let currentGoal = 0;
 let isSpinning = [false, false, false];
 let grid = [[], [], []];
 let busy = false;
 
 // --- SOUND SYSTEM ---
-function playSnd(id) {
-    // Simple beep sounds
+function playSound(id) {
+    try {
+        // Try to play from sounds folder
+        const audio = new Audio(`sounds/${id}.mp3`);
+        audio.volume = 0.5;
+        audio.play().catch(() => {
+            // If sound file doesn't exist, use fallback beep
+            playBeep(id);
+        });
+    } catch(e) {
+        // Fallback to beep sounds
+        playBeep(id);
+    }
+}
+
+function playBeep(id) {
     try {
         const audioContext = new (AudioContext || webkitAudioContext)();
         const oscillator = audioContext.createOscillator();
@@ -79,10 +87,10 @@ function playSnd(id) {
         let duration = 0.1;
         
         if (id === 'win') {
-            frequency = 523.25; // C5
+            frequency = 523.25;
             duration = 0.3;
         } else if (id === 'lose') {
-            frequency = 392; // G4
+            frequency = 392;
             duration = 0.3;
         } else if (id === 'spin') {
             frequency = 400;
@@ -105,24 +113,22 @@ function playSnd(id) {
 // --- SAVE/LOAD SYSTEM ---
 function saveGame() {
     const gameData = {
-        coins: coins,
-        honor: honor,
-        totalHonor: totalHonor,
+        points: points,
+        totalPoints: totalPoints,
         timestamp: Date.now()
     };
     
-    localStorage.setItem('tenchu_simple_save', JSON.stringify(gameData));
+    localStorage.setItem('tenchu_final_save', JSON.stringify(gameData));
     updateRankDisplay();
 }
 
 function loadGame() {
-    const saved = localStorage.getItem('tenchu_simple_save');
+    const saved = localStorage.getItem('tenchu_final_save');
     if (saved) {
         try {
             const data = JSON.parse(saved);
-            coins = data.coins || 0;
-            honor = data.honor || 0;
-            totalHonor = data.totalHonor || 0;
+            points = data.points || 0;
+            totalPoints = data.totalPoints || 0;
             updateRank();
             updateUI();
         } catch(e) {
@@ -134,9 +140,8 @@ function loadGame() {
 }
 
 function resetGame() {
-    coins = 0;
-    honor = 0;
-    totalHonor = 0;
+    points = 0;
+    totalPoints = 0;
     updateRank();
     updateUI();
 }
@@ -144,7 +149,7 @@ function resetGame() {
 // --- RANK SYSTEM ---
 function updateRank() {
     for (let i = RANKS.length - 1; i >= 0; i--) {
-        if (honor >= RANKS[i].minHonor) {
+        if (points >= RANKS[i].minPoints) {
             currentRank = i;
             break;
         }
@@ -153,40 +158,39 @@ function updateRank() {
 
 function updateRankDisplay() {
     const rankElement = document.getElementById('current-rank');
-    const honorElement = document.getElementById('total-honor');
-    const coinsElement = document.getElementById('saved-coins');
+    const pointsElement = document.getElementById('total-points');
     
     if (rankElement) {
         rankElement.textContent = RANKS[currentRank].name;
         rankElement.style.color = RANKS[currentRank].color;
     }
     
-    if (honorElement) honorElement.textContent = honor;
-    if (coinsElement) coinsElement.textContent = coins;
+    if (pointsElement) pointsElement.textContent = points;
 }
 
 // --- MISSION SYSTEM ---
 function startMission() {
-    playSnd('click');
+    playSound('click');
     
     // Random character
     const chars = Object.keys(CHARACTERS);
     currentCharacter = chars[Math.floor(Math.random() * chars.length)];
     const char = CHARACTERS[currentCharacter];
     
-    // Random message and goal
+    // Random message
     const randomMessage = char.messages[Math.floor(Math.random() * char.messages.length)];
-    const randomGoal = char.goals[Math.floor(Math.random() * char.goals.length)];
-    currentGoal = randomGoal;
     
     // Random starting coins (15-30)
     coins = 15 + Math.floor(Math.random() * 16);
+    
+    // Random goal points (20-40)
+    currentGoal = 20 + Math.floor(Math.random() * 21);
     
     // Update briefing
     document.getElementById('character-message').textContent = 
         `${char.emoji} ${char.name}: "${randomMessage}"`;
     document.getElementById('character-goal').textContent = 
-        `Goal: ${randomGoal}`;
+        `Goal: Earn ${currentGoal} points`;
     
     // Show briefing
     document.getElementById('main-menu').classList.add('hidden');
@@ -197,23 +201,22 @@ function startMission() {
 }
 
 function startGame() {
-    playSnd('click');
+    playSound('click');
     document.getElementById('mission-briefing').classList.add('hidden');
     document.getElementById('game-view').classList.remove('hidden');
     
     updateMissionIndicator();
     initMachine();
-    saveGame();
 }
 
 function showInstructions() {
-    playSnd('click');
+    playSound('click');
     document.getElementById('main-menu').classList.add('hidden');
     document.getElementById('info-screen').classList.remove('hidden');
 }
 
 function goToMainMenu() {
-    playSnd('click');
+    playSound('click');
     const currentScreen = document.querySelector('.screen:not(.hidden)');
     if (currentScreen) {
         currentScreen.classList.add('hidden');
@@ -223,7 +226,15 @@ function goToMainMenu() {
 }
 
 function returnToBase() {
-    playSnd('click');
+    playSound('click');
+    
+    // Lose points for quitting mission
+    if (coins > 0) {
+        const pointsLost = Math.floor(coins / 10);
+        points = Math.max(0, points - pointsLost);
+        totalPoints = Math.max(0, totalPoints - pointsLost);
+    }
+    
     saveGame();
     document.getElementById('game-view').classList.add('hidden');
     document.getElementById('main-menu').classList.remove('hidden');
@@ -231,7 +242,7 @@ function returnToBase() {
 }
 
 function donate() {
-    playSnd('click');
+    playSound('click');
     window.open('https://ko-fi.com', '_blank');
 }
 
@@ -245,23 +256,47 @@ function initMachine() {
             Math.floor(Math.random() * SYMBOLS) + 1,
             Math.floor(Math.random() * SYMBOLS) + 1
         ];
-        grid[i].forEach(id => strip.appendChild(createSym(id)));
+        grid[i].forEach(id => strip.appendChild(createSymbol(id)));
     }
     updateUI();
 }
 
-function createSym(id) {
+function createSymbol(id) {
     const d = document.createElement('div');
     d.className = 'symbol';
-    d.textContent = EMOJIS[id - 1] || '❓';
     d.setAttribute('data-value', id);
+    
+    // Try to load image first
+    const img = document.createElement('img');
+    img.className = 'symbol-img';
+    img.src = `images/${id}.png`;
+    img.alt = SYMBOL_NAMES[id - 1] || 'Symbol';
+    
+    // Create emoji fallback
+    const emoji = document.createElement('div');
+    emoji.className = 'symbol-emoji';
+    emoji.textContent = EMOJIS[id - 1] || '❓';
+    
+    // Handle image load error
+    img.onerror = function() {
+        this.style.display = 'none';
+        emoji.style.display = 'block';
+    };
+    
+    img.onload = function() {
+        this.style.display = 'block';
+        emoji.style.display = 'none';
+    };
+    
+    d.appendChild(img);
+    d.appendChild(emoji);
     return d;
 }
 
 function updateMissionIndicator() {
     const indicator = document.getElementById('mission-indicator');
-    if (currentCharacter && currentGoal) {
-        indicator.textContent = `${CHARACTERS[currentCharacter].name}: ${currentGoal}`;
+    if (currentCharacter) {
+        indicator.textContent = `${CHARACTERS[currentCharacter].name}`;
     }
 }
 
@@ -278,7 +313,7 @@ function startSpin() {
     // Deduct spin cost
     coins -= 5;
     updateUI();
-    playSnd('spin');
+    playSound('spin');
     
     // Start all reels spinning
     for (let i = 0; i < 3; i++) {
@@ -297,7 +332,7 @@ function startSpin() {
 function stopReel(i) {
     if (!isSpinning[i]) return;
     
-    playSnd('click');
+    playSound('click');
     isSpinning[i] = false;
     
     const strip = document.getElementById(`strip-${i}`);
@@ -312,7 +347,7 @@ function stopReel(i) {
     
     // Update display
     strip.innerHTML = '';
-    grid[i].forEach(id => strip.appendChild(createSym(id)));
+    grid[i].forEach(id => strip.appendChild(createSymbol(id)));
     
     // Check if all reels stopped
     if (!isSpinning.includes(true)) {
@@ -384,71 +419,101 @@ function finalize(lines) {
     panel.classList.remove('hidden');
     
     if (lines.length > 0) {
-        let total = 0;
+        let totalGold = 0;
+        let totalPointsEarned = 0;
         
         // Calculate rewards
         lines.forEach(line => {
-            let reward = 0;
-            // Character symbols (1, 2, 3) pay more
+            let goldReward = 0;
+            let pointsReward = 0;
+            
+            // Character symbols (1, 2, 3) give more
             switch(line.symbol) {
-                case 1: // Ninja
-                    reward = 30;
+                case 1: // Ninja (character)
+                    goldReward = 30;
+                    pointsReward = 5;
                     break;
-                case 2: // Sword Master (character)
-                    reward = 20;
+                case 2: // Sword (character)
+                    goldReward = 20;
+                    pointsReward = 4;
                     break;
                 case 3: // Oni (character)
-                    reward = 25;
+                    goldReward = 25;
+                    pointsReward = 4;
                     break;
                 case 4: // Lantern (item)
-                    reward = 10;
+                    goldReward = 10;
+                    pointsReward = 2;
                     break;
                 case 5: // Scroll (item)
-                    reward = 8;
+                    goldReward = 8;
+                    pointsReward = 1;
                     break;
                 case 6: // Castle (special)
-                    reward = 15;
+                    goldReward = 15;
+                    pointsReward = 3;
                     break;
                 default:
-                    reward = 10;
+                    goldReward = 10;
+                    pointsReward = 2;
             }
-            total += reward;
+            totalGold += goldReward;
+            totalPointsEarned += pointsReward;
             highlightLine(line);
         });
         
         // Multi-line bonus
         if (lines.length > 1) {
             type.textContent = "BIG WIN!";
-            total = Math.floor(total * 1.3);
+            totalGold = Math.floor(totalGold * 1.3);
+            totalPointsEarned = Math.floor(totalPointsEarned * 1.3);
         } else {
             type.textContent = "WIN!";
         }
         
-        // Cap at maximum
-        const finalReward = Math.min(50, total);
-        cash.textContent = `+${finalReward} GOLD`;
+        // Cap gold at 50
+        const finalGold = Math.min(50, totalGold);
+        cash.textContent = `+${finalGold} GOLD`;
         
-        // Add coins with animation
-        animateCoins(finalReward);
+        // Add gold and points
+        coins += finalGold;
+        points += totalPointsEarned;
+        totalPoints += totalPointsEarned;
         
-        // Add honor for win
-        const honorGain = Math.floor(finalReward / 5);
-        honor += honorGain;
-        totalHonor += honorGain;
+        updateUI();
         updateRank();
         
-        playSnd('win');
+        // Check if goal reached
+        if (currentGoal > 0 && points >= currentGoal) {
+            setTimeout(() => {
+                type.textContent = "GOAL REACHED!";
+                cash.textContent = `Mission Complete!`;
+            }, 1000);
+        }
+        
+        playSound('win');
         
     } else {
         type.textContent = "FAILED";
         cash.textContent = "No matches";
-        playSnd('lose');
+        
+        // Lose 1 point for failed spin
+        points = Math.max(0, points - 1);
+        totalPoints = Math.max(0, totalPoints - 1);
+        updateRank();
+        
+        playSound('lose');
         
         // Check if out of coins
         if (coins < 5) {
             setTimeout(() => {
-                type.textContent = "GAME OVER";
+                type.textContent = "MISSION FAILED";
                 cash.textContent = "No gold left";
+                
+                // Lose more points for mission failure
+                points = Math.max(0, points - 5);
+                totalPoints = Math.max(0, totalPoints - 5);
+                updateRank();
             }, 1000);
         }
     }
@@ -464,38 +529,6 @@ function finalize(lines) {
 }
 
 // --- ANIMATIONS ---
-function animateCoins(amount) {
-    const steps = 3;
-    const stepValue = Math.ceil(amount / steps);
-    let count = 0;
-    
-    const timer = setInterval(() => {
-        if (count >= amount) {
-            clearInterval(timer);
-            saveGame();
-            return;
-        }
-        
-        coins += stepValue;
-        count += stepValue;
-        
-        if (count > amount) {
-            coins -= (count - amount);
-            count = amount;
-        }
-        
-        updateUI();
-        
-        // Visual feedback
-        const coinElement = document.getElementById('coins');
-        coinElement.classList.add('coin-bounce');
-        setTimeout(() => {
-            coinElement.classList.remove('coin-bounce');
-        }, 200);
-        
-    }, 100);
-}
-
 function createParticles(count, element) {
     const particles = document.getElementById('particles');
     const rect = element.getBoundingClientRect();
@@ -528,7 +561,7 @@ function createParticles(count, element) {
 function updateUI() {
     // Update displays
     document.getElementById('coins').textContent = coins;
-    document.getElementById('honor').textContent = honor;
+    document.getElementById('points').textContent = points;
     
     // Update spin button state
     const spinBtn = document.getElementById('spin-btn');
@@ -581,5 +614,10 @@ document.addEventListener('keydown', function(e) {
 
 // Prevent right-click
 document.addEventListener('contextmenu', function(e) {
+    e.preventDefault();
+});
+
+// Prevent text selection
+document.addEventListener('selectstart', function(e) {
     e.preventDefault();
 });
