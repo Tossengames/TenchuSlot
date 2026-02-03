@@ -45,15 +45,16 @@
                 <h3>HOW TO PLAY</h3>
                 <p>1. Click SPIN to start (costs 5 gold)</p>
                 <p>2. Click each reel to stop it</p>
-                <p>3. Match 3 symbols to win</p>
+                <p>3. Match 3 symbols to win gold</p>
                 
-                <h3>SYMBOL VALUES</h3>
-                <p>Matching character symbols gives more points.</p>
-                <p>Character symbols (1, 2, 3) give more points than items.</p>
+                <h3>MISSION GOALS</h3>
+                <p>Each character gives you a gold target to reach.</p>
+                <p>Character symbols give more gold than items.</p>
+                <p>Reach the target to complete the mission and earn points.</p>
                 
                 <h3>RANKING SYSTEM</h3>
-                <p>Earn points to increase your rank.</p>
-                <p>Lose points if you fail missions or quit.</p>
+                <p>Complete missions to earn points and rank up.</p>
+                <p>Fail or quit missions to lose points.</p>
                 <p>Ranks: INITIATE → SHINOBI → ASSASSIN → SHADOW MASTER → GRAND MASTER</p>
                 
                 <h3>SAVING</h3>
@@ -86,22 +87,39 @@
         <div class="game-footer">
             <button id="spin-btn" onclick="startSpin()">SPIN (5 GOLD)</button>
             <div class="footer-btns">
-                <button class="mini-btn" onclick="returnToBase()">END MISSION</button>
+                <button class="mini-btn" onclick="returnToBase()">LEAVE MISSION</button>
             </div>
         </div>
     </div>
 
-    <!-- Game Over Panel -->
-    <div id="game-over-panel" class="screen hidden">
+    <!-- Mission Complete Panel -->
+    <div id="mission-complete-panel" class="screen hidden">
         <div class="mission-briefing">
-            <h2 id="game-over-title">MISSION FAILED</h2>
-            <div id="game-over-message">You have run out of gold!</div>
+            <h2 id="mission-complete-title">MISSION COMPLETE</h2>
+            <div class="character-message" id="mission-character-message"></div>
+            <div id="mission-complete-message"></div>
+            <div class="mission-reward" id="mission-reward">+0 POINTS</div>
+            <div class="rank-change" id="rank-change"></div>
+            <button onclick="goToMainMenu()">BACK TO MENU</button>
+        </div>
+    </div>
+
+    <!-- Mission Failed Panel -->
+    <div id="mission-failed-panel" class="screen hidden">
+        <div class="mission-briefing">
+            <h2 id="mission-failed-title">MISSION FAILED</h2>
+            <div class="character-message" id="mission-failed-message"></div>
+            <div id="mission-failed-details"></div>
+            <div class="rank-change" id="failed-rank-change"></div>
             <div class="game-over-buttons">
                 <button onclick="tryAgain()">TRY AGAIN</button>
                 <button onclick="goToMainMenu()">BACK TO MENU</button>
             </div>
         </div>
     </div>
+
+    <!-- Message Toast -->
+    <div id="message-toast" class="hidden"></div>
 
     <!-- Particles Container -->
     <div class="particles" id="particles"></div>
