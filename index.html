@@ -5,123 +5,420 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TENCHU: Shadow Mission</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🥷</text></svg>">
 </head>
 <body>
+    <!-- Animated Background -->
+    <div class="animated-bg">
+        <div class="bg-layer-1"></div>
+        <div class="bg-layer-2"></div>
+        <div class="bg-layer-3"></div>
+        <div class="bg-layer-4"></div>
+    </div>
+
+    <!-- Floating Particles -->
+    <div class="floating-particles"></div>
 
     <!-- Main Menu -->
     <div id="main-menu" class="screen">
-        <h1 class="glitch-title">TENCHU<br>SHADOW MISSION</h1>
-        
-        <!-- Rank display below title -->
-        <div class="rank-container">
-            <div class="rank-name" id="current-rank">INITIATE</div>
-            <div class="rank-points">POINTS: <span id="total-points">0</span></div>
-        </div>
-        
-        <div class="menu-btns">
-            <button onclick="startMission()">START MISSION</button>
-            <button onclick="showInstructions()">INSTRUCTIONS</button>
-            <button class="donate-btn" onclick="donate()">DONATE</button>
+        <div class="menu-container">
+            <!-- Logo with glow effect -->
+            <div class="logo-container">
+                <div class="logo-shine"></div>
+                <h1 class="glitch-title" data-text="TENCHU SHADOW MISSION">TENCHU<br><span class="subtitle">SHADOW MISSION</span></h1>
+                <div class="logo-accent"></div>
+            </div>
+            
+            <!-- Rank display with modern card -->
+            <div class="rank-card">
+                <div class="rank-card-inner">
+                    <div class="rank-icon">
+                        <i class="fas fa-user-secret"></i>
+                    </div>
+                    <div class="rank-info">
+                        <div class="rank-name" id="current-rank">INITIATE</div>
+                        <div class="rank-level">LEVEL <span id="rank-level">1</span></div>
+                        <div class="rank-points">POINTS: <span id="total-points">0</span></div>
+                    </div>
+                    <div class="rank-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="rank-progress"></div>
+                        </div>
+                        <div class="progress-text">NEXT RANK: <span id="next-rank-points">50</span></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Menu buttons with modern design -->
+            <div class="menu-btns">
+                <button class="btn-primary" onclick="startMission()">
+                    <i class="fas fa-play"></i> START MISSION
+                </button>
+                <button class="btn-secondary" onclick="showInstructions()">
+                    <i class="fas fa-book"></i> INSTRUCTIONS
+                </button>
+                <button class="btn-donate" onclick="donate()">
+                    <i class="fas fa-heart"></i> SUPPORT
+                </button>
+            </div>
+            
+            <!-- Footer info -->
+            <div class="menu-footer">
+                <div class="version">v1.2.0</div>
+                <div class="hint">
+                    <i class="fas fa-lightbulb"></i> Press ESC to pause during mission
+                </div>
+            </div>
         </div>
     </div>
 
     <!-- Mission Briefing -->
     <div id="mission-briefing" class="screen hidden">
-        <div class="mission-briefing">
-            <h2>MISSION BRIEFING</h2>
-            <div class="character-message" id="character-message"></div>
-            <div class="character-goal" id="character-goal"></div>
-            <button onclick="startGame()">BEGIN MISSION</button>
-            <button class="mini-btn" onclick="goToMainMenu()">BACK</button>
+        <div class="briefing-container">
+            <div class="briefing-header">
+                <h2>MISSION BRIEFING</h2>
+                <div class="briefing-line"></div>
+            </div>
+            
+            <div class="character-card">
+                <div class="character-portrait" id="character-portrait"></div>
+                <div class="character-info">
+                    <div class="character-name" id="character-name"></div>
+                    <div class="character-message" id="character-message"></div>
+                </div>
+            </div>
+            
+            <div class="mission-details">
+                <div class="detail-box">
+                    <div class="detail-icon">
+                        <i class="fas fa-bullseye"></i>
+                    </div>
+                    <div class="detail-content">
+                        <div class="detail-title">MISSION OBJECTIVE</div>
+                        <div class="detail-text" id="character-goal"></div>
+                    </div>
+                </div>
+                
+                <div class="detail-box">
+                    <div class="detail-icon">
+                        <i class="fas fa-coins"></i>
+                    </div>
+                    <div class="detail-content">
+                        <div class="detail-title">STARTING RESOURCES</div>
+                        <div class="detail-text" id="starting-gold"></div>
+                    </div>
+                </div>
+                
+                <div class="detail-box">
+                    <div class="detail-icon">
+                        <i class="fas fa-trophy"></i>
+                    </div>
+                    <div class="detail-content">
+                        <div class="detail-title">REWARD</div>
+                        <div class="detail-text">Rank Points & Glory</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="briefing-buttons">
+                <button class="btn-primary" onclick="startGame()">
+                    <i class="fas fa-forward"></i> BEGIN MISSION
+                </button>
+                <button class="btn-outline" onclick="goToMainMenu()">
+                    <i class="fas fa-arrow-left"></i> BACK
+                </button>
+            </div>
         </div>
     </div>
 
     <!-- Instructions -->
     <div id="info-screen" class="screen hidden">
-        <div class="mission-briefing">
-            <h2>INSTRUCTIONS</h2>
-            <div class="rules-content">
-                <h3>HOW TO PLAY</h3>
-                <p>1. Click SPIN to start (costs 5 gold)</p>
-                <p>2. Click each reel to stop it</p>
-                <p>3. Match 3 symbols to win gold</p>
-                
-                <h3>MISSION GOALS</h3>
-                <p>Each character gives you a gold target to reach.</p>
-                <p>Character symbols give more gold than items.</p>
-                <p>Reach the target to complete the mission and earn points.</p>
-                
-                <h3>RANKING SYSTEM</h3>
-                <p>Complete missions to earn points and rank up.</p>
-                <p>Fail or quit missions to lose points.</p>
-                <p>Ranks: INITIATE → SHINOBI → ASSASSIN → SHADOW MASTER → GRAND MASTER</p>
-                
-                <h3>SAVING</h3>
-                <p>Your rank and points are saved automatically.</p>
+        <div class="info-container">
+            <div class="info-header">
+                <h2>SHINOBI MANUAL</h2>
+                <div class="info-line"></div>
             </div>
-            <button onclick="goToMainMenu()">BACK</button>
+            
+            <div class="rules-content">
+                <div class="rule-section">
+                    <div class="rule-icon">
+                        <i class="fas fa-gamepad"></i>
+                    </div>
+                    <div class="rule-text">
+                        <h3>HOW TO PLAY</h3>
+                        <p>1. Click SPIN to start (costs 5 gold)</p>
+                        <p>2. Click each reel to stop it individually</p>
+                        <p>3. Match 3 symbols to win gold</p>
+                    </div>
+                </div>
+                
+                <div class="rule-section">
+                    <div class="rule-icon">
+                        <i class="fas fa-flag-checkered"></i>
+                    </div>
+                    <div class="rule-text">
+                        <h3>MISSION GOALS</h3>
+                        <p>Each character gives you a gold target to reach.</p>
+                        <p>Character symbols give more gold than items.</p>
+                        <p>Reach the target to complete the mission and earn points.</p>
+                    </div>
+                </div>
+                
+                <div class="rule-section">
+                    <div class="rule-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="rule-text">
+                        <h3>RANKING SYSTEM</h3>
+                        <p>Complete missions to earn points and rank up.</p>
+                        <p>Fail or quit missions to lose points.</p>
+                        <p>Ranks: INITIATE → SHINOBI → ASSASSIN → SHADOW MASTER → GRAND MASTER</p>
+                    </div>
+                </div>
+                
+                <div class="rule-section">
+                    <div class="rule-icon">
+                        <i class="fas fa-save"></i>
+                    </div>
+                    <div class="rule-text">
+                        <h3>SAVING</h3>
+                        <p>Your rank and points are saved automatically.</p>
+                        <p>Progress is stored in your browser.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="info-buttons">
+                <button class="btn-primary" onclick="goToMainMenu()">
+                    <i class="fas fa-home"></i> BACK TO MENU
+                </button>
+            </div>
         </div>
     </div>
 
     <!-- Game View -->
     <div id="game-view" class="screen hidden">
+        <!-- Game Header -->
         <div class="game-header">
-            <div class="stat">GOLD: <span id="coins">0</span></div>
-            <div class="title-mini" id="mission-indicator">MISSION ACTIVE</div>
-            <!-- Removed points display from header -->
+            <div class="header-left">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-coins"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-label">GOLD</div>
+                        <div class="stat-value" id="coins">0</div>
+                    </div>
+                    <div class="stat-glow"></div>
+                </div>
+            </div>
+            
+            <div class="header-center">
+                <div class="mission-indicator" id="mission-indicator">
+                    <div class="mission-glow"></div>
+                    <div class="mission-text">MISSION ACTIVE</div>
+                    <div class="mission-progress">
+                        <div class="progress-track">
+                            <div class="progress-fill" id="mission-progress"></div>
+                        </div>
+                        <div class="progress-text" id="mission-progress-text">0%</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="header-right">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-crosshairs"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-label">COLLECTED</div>
+                        <div class="stat-value" id="collected-gold">0</div>
+                    </div>
+                    <div class="stat-glow"></div>
+                </div>
+            </div>
         </div>
 
-        <div class="slot-machine" id="machine">
-            <div class="reel" id="reel-0" onclick="stopReel(0)"><div class="strip" id="strip-0"></div></div>
-            <div class="reel" id="reel-1" onclick="stopReel(1)"><div class="strip" id="strip-1"></div></div>
-            <div class="reel" id="reel-2" onclick="stopReel(2)"><div class="strip" id="strip-2"></div></div>
+        <!-- Slot Machine -->
+        <div class="slot-container">
+            <div class="slot-frame">
+                <div class="slot-glow"></div>
+                <div class="slot-machine" id="machine">
+                    <div class="reel" id="reel-0" onclick="stopReel(0)">
+                        <div class="reel-frame">
+                            <div class="reel-light top"></div>
+                            <div class="reel-light bottom"></div>
+                            <div class="strip" id="strip-0"></div>
+                        </div>
+                        <div class="reel-label">REEL 1</div>
+                    </div>
+                    <div class="reel" id="reel-1" onclick="stopReel(1)">
+                        <div class="reel-frame">
+                            <div class="reel-light top"></div>
+                            <div class="reel-light bottom"></div>
+                            <div class="strip" id="strip-1"></div>
+                        </div>
+                        <div class="reel-label">REEL 2</div>
+                    </div>
+                    <div class="reel" id="reel-2" onclick="stopReel(2)">
+                        <div class="reel-frame">
+                            <div class="reel-light top"></div>
+                            <div class="reel-light bottom"></div>
+                            <div class="strip" id="strip-2"></div>
+                        </div>
+                        <div class="reel-label">REEL 3</div>
+                    </div>
+                </div>
+                <div class="slot-payline">
+                    <div class="payline-glow"></div>
+                    <div class="payline-text">PAYLINE</div>
+                </div>
+            </div>
         </div>
 
-        <!-- Result panel BELOW slots -->
+        <!-- Result Panel -->
         <div id="result-panel" class="hidden">
-            <h2 id="res-type"></h2>
-            <h3 id="res-coins"></h3>
+            <div class="result-glow"></div>
+            <div class="result-content">
+                <h2 id="res-type"></h2>
+                <div class="result-amount">
+                    <i class="fas fa-coins"></i>
+                    <span id="res-coins"></span>
+                </div>
+                <div class="result-effect" id="result-effect"></div>
+            </div>
         </div>
 
-        <div class="game-footer">
-            <button id="spin-btn" onclick="startSpin()">SPIN (5 GOLD)</button>
-            <div class="footer-btns">
-                <button class="mini-btn" onclick="returnToBase()">LEAVE MISSION</button>
+        <!-- Game Controls -->
+        <div class="game-controls">
+            <button class="btn-spin" id="spin-btn" onclick="startSpin()">
+                <div class="spin-glow"></div>
+                <div class="spin-content">
+                    <i class="fas fa-redo-alt"></i>
+                    <span>SPIN (5 GOLD)</span>
+                </div>
+                <div class="spin-effect"></div>
+            </button>
+            
+            <div class="control-buttons">
+                <button class="btn-control" onclick="showQuickGuide()">
+                    <i class="fas fa-question"></i>
+                </button>
+                <button class="btn-control btn-leave" onclick="returnToBase()">
+                    <i class="fas fa-door-open"></i> LEAVE
+                </button>
+                <button class="btn-control" onclick="toggleSound()">
+                    <i class="fas fa-volume-up" id="sound-icon"></i>
+                </button>
             </div>
         </div>
     </div>
 
     <!-- Mission Complete Panel -->
     <div id="mission-complete-panel" class="screen hidden">
-        <div class="mission-briefing">
-            <h2 id="mission-complete-title">MISSION COMPLETE</h2>
-            <div class="character-message" id="mission-character-message"></div>
-            <div id="mission-complete-message"></div>
-            <div class="mission-reward" id="mission-reward">+0 POINTS</div>
-            <div class="rank-change" id="rank-change"></div>
-            <button onclick="goToMainMenu()">BACK TO MENU</button>
+        <div class="mission-complete-container">
+            <div class="success-glow"></div>
+            <div class="success-sparkles"></div>
+            
+            <div class="complete-content">
+                <div class="complete-header">
+                    <i class="fas fa-trophy"></i>
+                    <h2 id="mission-complete-title">MISSION COMPLETE</h2>
+                </div>
+                
+                <div class="complete-message">
+                    <div class="character-final" id="mission-character-message"></div>
+                    <div class="mission-stats" id="mission-complete-message"></div>
+                </div>
+                
+                <div class="complete-rewards">
+                    <div class="reward-card">
+                        <div class="reward-icon">
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <div class="reward-content">
+                            <div class="reward-title">MISSION REWARD</div>
+                            <div class="reward-amount" id="mission-reward">+0 POINTS</div>
+                        </div>
+                    </div>
+                    
+                    <div class="rank-up-card" id="rank-change-container">
+                        <div class="rank-up-icon">
+                            <i class="fas fa-arrow-up"></i>
+                        </div>
+                        <div class="rank-up-content">
+                            <div class="rank-up-title" id="rank-change-title">NEW RANK ACHIEVED!</div>
+                            <div class="rank-up-details" id="rank-change"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="complete-buttons">
+                    <button class="btn-primary" onclick="goToMainMenu()">
+                        <i class="fas fa-home"></i> BACK TO MENU
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
     <!-- Mission Failed Panel -->
     <div id="mission-failed-panel" class="screen hidden">
-        <div class="mission-briefing">
-            <h2 id="mission-failed-title">MISSION FAILED</h2>
-            <div class="character-message" id="mission-failed-message"></div>
-            <div id="mission-failed-details"></div>
-            <div class="rank-change" id="failed-rank-change"></div>
-            <div class="game-over-buttons centered">
-                <button onclick="goToMainMenu()">BACK TO MENU</button>
+        <div class="mission-failed-container">
+            <div class="failure-glow"></div>
+            
+            <div class="failed-content">
+                <div class="failed-header">
+                    <i class="fas fa-skull-crossbones"></i>
+                    <h2 id="mission-failed-title">MISSION FAILED</h2>
+                </div>
+                
+                <div class="failed-message">
+                    <div class="character-final" id="mission-failed-message"></div>
+                    <div class="mission-stats" id="mission-failed-details"></div>
+                </div>
+                
+                <div class="failed-penalty">
+                    <div class="penalty-card">
+                        <div class="penalty-icon">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="penalty-content">
+                            <div class="penalty-title">PENALTY</div>
+                            <div class="penalty-amount" id="failed-rank-change">-0 POINTS</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="failed-buttons centered">
+                    <button class="btn-primary" onclick="goToMainMenu()">
+                        <i class="fas fa-home"></i> BACK TO MENU
+                    </button>
+                </div>
             </div>
+        </div>
+    </div>
+
+    <!-- Quick Guide Overlay -->
+    <div id="quick-guide" class="hidden">
+        <div class="guide-content">
+            <h3>QUICK CONTROLS</h3>
+            <div class="guide-item"><kbd>SPACE</kbd> - Spin reels</div>
+            <div class="guide-item"><kbd>1, 2, 3</kbd> - Stop reels</div>
+            <div class="guide-item"><kbd>ESC</kbd> - Pause/Leave</div>
+            <button class="btn-mini" onclick="hideQuickGuide()">GOT IT</button>
         </div>
     </div>
 
     <!-- Message Toast -->
     <div id="message-toast" class="hidden"></div>
 
-    <!-- Particles Container -->
-    <div class="particles" id="particles"></div>
+    <!-- Audio Toggle -->
+    <div class="audio-toggle" onclick="toggleSound()">
+        <i class="fas fa-volume-up" id="global-sound-icon"></i>
+    </div>
 
     <script src="game.js"></script>
 </body>
