@@ -1,5 +1,5 @@
 // ============================================
-// TENCHU: SHADOW MISSION - FINAL VERSION
+// TENCHU: SHADOW MISSION - FIXED VERSION
 // ============================================
 
 // --- GAME CONFIGURATION ---
@@ -233,14 +233,43 @@ function updateRankDisplay() {
     if (pointsElement) pointsElement.textContent = points;
 }
 
+// --- RESET GAME STATE FOR NEW MISSION ---
+function resetMissionState() {
+    coins = 0; // Always start with 0 gold
+    currentGoal = 0;
+    missionStarted = false;
+    busy = false;
+    isSpinning = [false, false, false];
+    grid = [[], [], []];
+    
+    // Reset all reels
+    for (let i = 0; i < 3; i++) {
+        const strip = document.getElementById(`strip-${i}`);
+        if (strip) {
+            strip.classList.remove('spinning');
+            strip.innerHTML = '';
+        }
+    }
+    
+    // Reset UI elements
+    const resultPanel = document.getElementById('result-panel');
+    if (resultPanel) resultPanel.classList.add('hidden');
+    
+    const spinBtn = document.getElementById('spin-btn');
+    if (spinBtn) spinBtn.classList.remove('hidden-btn');
+    
+    // Remove winning highlights
+    document.querySelectorAll('.symbol').forEach(s => s.classList.remove('winning-symbol'));
+    
+    updateUI();
+}
+
 // --- MISSION SYSTEM ---
 function startMission() {
     playSound('click');
     
-    // Reset game state for new mission
-    coins = 0;
-    currentGoal = 0;
-    missionStarted = false;
+    // Reset game state completely for new mission
+    resetMissionState();
     
     // Random character
     const chars = Object.keys(CHARACTERS);
@@ -250,9 +279,8 @@ function startMission() {
     // Random message
     const randomMessage = char.messages[Math.floor(Math.random() * char.messages.length)];
     
-    // Random starting coins (15, 20, 25, or 30 only)
-    const startOptions = [15, 20, 25, 30];
-    coins = startOptions[Math.floor(Math.random() * startOptions.length)];
+    // Always start with 0 gold (FIXED)
+    coins = 0;
     
     // Random goal gold (30, 40, 50, 60, or 70 only)
     const goalOptions = [30, 40, 50, 60, 70];
@@ -262,7 +290,7 @@ function startMission() {
     document.getElementById('character-message').textContent = 
         `${char.emoji} ${char.name}: "${randomMessage}"`;
     document.getElementById('character-goal').textContent = 
-        `Goal: Collect ${currentGoal} gold`;
+        `Goal: Collect ${currentGoal} gold (Start with: ${coins} gold)`;
     
     // Show briefing
     document.getElementById('main-menu').classList.add('hidden');
@@ -292,6 +320,9 @@ function showInstructions() {
 
 function goToMainMenu() {
     playSound('click');
+    
+    // Reset mission state when returning to menu
+    resetMissionState();
     
     const currentScreen = document.querySelector('.screen:not(.hidden)');
     if (currentScreen) {
@@ -335,12 +366,6 @@ function returnToBase() {
     
     document.getElementById('game-view').classList.add('hidden');
     document.getElementById('mission-failed-panel').classList.remove('hidden');
-}
-
-function tryAgain() {
-    playSound('click');
-    document.getElementById('mission-failed-panel').classList.add('hidden');
-    startMission(); // Start fresh mission
 }
 
 function donate() {
@@ -702,7 +727,9 @@ function createParticles(count, element) {
 function updateUI() {
     // Update displays
     document.getElementById('coins').textContent = coins;
-    document.getElementById('points').textContent = points;
+    
+    // Remove points display from game view (FIXED)
+    // Points are only shown in main menu
     
     // Update spin button state
     const spinBtn = document.getElementById('spin-btn');
@@ -722,6 +749,9 @@ window.onload = function() {
     // Load saved game
     loadGame();
     updateRankDisplay();
+    
+    // Reset mission state on load
+    resetMissionState();
     
     // Auto-save every minute
     setInterval(saveGame, 60000);
