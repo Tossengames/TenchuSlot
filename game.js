@@ -78,13 +78,14 @@ const RANKS = [
 ];
 
 // --- GAME STATE ---
-let coins = 0;
+let coins = 0;                // Current total gold
+let collectedGold = 0;        // Gold collected during this mission (wins only)
 let points = 0;
 let totalPoints = 0;
 let currentRank = 0;
 let oldRank = 0;
 let currentCharacter = null;
-let currentGoal = 0;
+let currentGoal = 0;          // Goal for collected gold (not total gold)
 let missionStarted = false;
 let isSpinning = [false, false, false];
 let grid = [[], [], []];
@@ -235,7 +236,8 @@ function updateRankDisplay() {
 
 // --- RESET GAME STATE FOR NEW MISSION ---
 function resetMissionState() {
-    coins = 0; // Always start with 0 gold
+    coins = 0;
+    collectedGold = 0;
     currentGoal = 0;
     missionStarted = false;
     busy = false;
@@ -279,18 +281,20 @@ function startMission() {
     // Random message
     const randomMessage = char.messages[Math.floor(Math.random() * char.messages.length)];
     
-    // Always start with 0 gold (FIXED)
-    coins = 0;
+    // Random starting gold (15, 20, 25, or 30 only)
+    const startOptions = [15, 20, 25, 30];
+    coins = startOptions[Math.floor(Math.random() * startOptions.length)];
+    collectedGold = 0; // Start with 0 collected gold
     
-    // Random goal gold (30, 40, 50, 60, or 70 only)
+    // Random goal for collected gold (30, 40, 50, 60, or 70 only)
     const goalOptions = [30, 40, 50, 60, 70];
     currentGoal = goalOptions[Math.floor(Math.random() * goalOptions.length)];
     
-    // Update briefing
+    // Update briefing - Show starting gold but goal is for collected gold
     document.getElementById('character-message').textContent = 
         `${char.emoji} ${char.name}: "${randomMessage}"`;
     document.getElementById('character-goal').textContent = 
-        `Goal: Collect ${currentGoal} gold (Start with: ${coins} gold)`;
+        `Goal: Collect ${currentGoal} more gold (You have ${coins} gold to start)`;
     
     // Show briefing
     document.getElementById('main-menu').classList.add('hidden');
@@ -300,6 +304,7 @@ function startMission() {
     
     // Update UI
     updateUI();
+    updateMissionIndicator();
 }
 
 function startGame() {
@@ -342,7 +347,7 @@ function returnToBase() {
     }
     
     // Calculate points lost for quitting (5-15 points based on gold collected)
-    const pointsLost = Math.min(15, Math.max(5, Math.floor(coins / 5)));
+    const pointsLost = Math.min(15, Math.max(5, Math.floor(collectedGold / 5)));
     const oldPoints = points;
     points = Math.max(0, points - pointsLost);
     totalPoints = Math.max(0, totalPoints - pointsLost);
@@ -358,7 +363,7 @@ function returnToBase() {
     document.getElementById('mission-failed-message').textContent = 
         `${char.emoji} ${char.name}: "${randomFailure}"`;
     document.getElementById('mission-failed-details').textContent = 
-        `You left the mission with ${coins} gold (needed ${currentGoal}).`;
+        `You left with ${coins} total gold (collected ${collectedGold} gold, needed ${currentGoal}).`;
     
     const rankChangeElement = document.getElementById('failed-rank-change');
     rankChangeElement.textContent = `-${pointsLost} POINTS`;
@@ -374,7 +379,7 @@ function donate() {
 }
 
 function completeMission() {
-    if (!missionStarted || coins < currentGoal) return;
+    if (!missionStarted || collectedGold < currentGoal) return;
     
     missionStarted = false;
     
@@ -395,7 +400,7 @@ function completeMission() {
     document.getElementById('mission-character-message').textContent = 
         `${char.emoji} ${char.name}: "${randomSuccess}"`;
     document.getElementById('mission-complete-message').textContent = 
-        `You collected ${coins} gold (goal was ${currentGoal}).`;
+        `You collected ${collectedGold} gold (goal was ${currentGoal}). Total gold: ${coins}`;
     document.getElementById('mission-reward').textContent = `+${pointsEarned} POINTS`;
     
     const rankChangeElement = document.getElementById('rank-change');
@@ -460,7 +465,7 @@ function createSymbol(id) {
 function updateMissionIndicator() {
     const indicator = document.getElementById('mission-indicator');
     if (currentCharacter && currentGoal > 0) {
-        indicator.textContent = `${CHARACTERS[currentCharacter].name}: ${coins}/${currentGoal} GOLD`;
+        indicator.textContent = `${CHARACTERS[currentCharacter].name}: ${collectedGold}/${currentGoal} GOLD`;
     } else if (currentCharacter) {
         indicator.textContent = `${CHARACTERS[currentCharacter].name}`;
     }
@@ -476,7 +481,7 @@ function startSpin() {
     document.getElementById('result-panel').classList.add('hidden');
     document.querySelectorAll('.symbol').forEach(s => s.classList.remove('winning-symbol'));
     
-    // Deduct spin cost
+    // Deduct spin cost from coins
     coins -= 5;
     updateUI();
     playSound('spin');
@@ -630,16 +635,17 @@ function finalize(lines) {
         const finalGold = Math.round(totalGold / 5) * 5;
         cash.textContent = `+${finalGold} GOLD`;
         
-        // Add gold
+        // Add to both coins (for playing) and collectedGold (for goal)
         coins += finalGold;
+        collectedGold += finalGold;
         
         updateUI();
         updateMissionIndicator();
         
         playSound('win');
         
-        // Check if goal reached
-        if (coins >= currentGoal) {
+        // Check if goal reached (based on collectedGold only)
+        if (collectedGold >= currentGoal) {
             setTimeout(() => {
                 completeMission();
             }, 1500);
@@ -672,7 +678,7 @@ function finalize(lines) {
                 document.getElementById('mission-failed-message').textContent = 
                     `${char.emoji} ${char.name}: "${randomFailure}"`;
                 document.getElementById('mission-failed-details').textContent = 
-                    `You ran out of gold! Collected ${coins} gold (needed ${currentGoal}).`;
+                    `You ran out of gold! Collected ${collectedGold} gold (needed ${currentGoal}). Total: ${coins} gold`;
                 
                 const rankChangeElement = document.getElementById('failed-rank-change');
                 rankChangeElement.textContent = `-${pointsLost} POINTS`;
@@ -727,9 +733,6 @@ function createParticles(count, element) {
 function updateUI() {
     // Update displays
     document.getElementById('coins').textContent = coins;
-    
-    // Remove points display from game view (FIXED)
-    // Points are only shown in main menu
     
     // Update spin button state
     const spinBtn = document.getElementById('spin-btn');
