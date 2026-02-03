@@ -1,5 +1,5 @@
 // ============================================
-// TENCHU: SHADOW MISSION - FINAL CORRECTED VERSION
+// TENCHU: SHADOW MISSION - FINAL VERSION
 // ============================================
 
 // --- GAME CONFIGURATION ---
@@ -16,6 +16,16 @@ const CHARACTERS = {
             "The Azure Dragon needs your help.",
             "Lord Gohda requires your service.",
             "Azuma village is counting on you."
+        ],
+        successMessages: [
+            "Excellent work. The Azure Dragon is pleased.",
+            "Your service honors Lord Gohda.",
+            "Azuma village will remember your contribution."
+        ],
+        failureMessages: [
+            "You have dishonored the Azure Dragon.",
+            "Lord Gohda will hear of this failure.",
+            "Azuma village suffers because of you."
         ]
     },
     ayame: {
@@ -25,6 +35,16 @@ const CHARACTERS = {
             "The Crimson Lily needs assistance.",
             "Our sisters require your aid.",
             "Help us gather what we need."
+        ],
+        successMessages: [
+            "The Crimson Lily thanks you for your service.",
+            "Our sisters are grateful for your help.",
+            "You have served the kunoichi well."
+        ],
+        failureMessages: [
+            "You have failed the Crimson Lily.",
+            "Our sisters are disappointed.",
+            "You bring shame to our order."
         ]
     },
     tatsumaru: {
@@ -34,6 +54,16 @@ const CHARACTERS = {
             "The Green Viper seeks your help.",
             "Join our cause, shinobi.",
             "We need resources for the rebellion."
+        ],
+        successMessages: [
+            "The Green Viper is pleased with your work.",
+            "You serve the rebellion well.",
+            "Your contribution will be remembered."
+        ],
+        failureMessages: [
+            "You have failed the Green Viper.",
+            "The rebellion suffers because of you.",
+            "You are not worthy of our cause."
         ]
     }
 };
@@ -52,25 +82,50 @@ let coins = 0;
 let points = 0;
 let totalPoints = 0;
 let currentRank = 0;
+let oldRank = 0;
 let currentCharacter = null;
 let currentGoal = 0;
+let missionStarted = false;
 let isSpinning = [false, false, false];
 let grid = [[], [], []];
 let busy = false;
-let gameOver = false;
+
+// --- UTILITY FUNCTIONS ---
+function showMessage(text, type = 'info') {
+    const toast = document.getElementById('message-toast');
+    toast.textContent = text;
+    toast.className = '';
+    
+    if (type === 'success') {
+        toast.style.color = '#33cc33';
+        toast.style.borderColor = '#33cc33';
+    } else if (type === 'warning') {
+        toast.style.color = '#ffcc00';
+        toast.style.borderColor = '#ffcc00';
+    } else if (type === 'error') {
+        toast.style.color = '#ff3333';
+        toast.style.borderColor = '#ff3333';
+    } else {
+        toast.style.color = '#ffcc00';
+        toast.style.borderColor = '#ff3300';
+    }
+    
+    toast.classList.remove('hidden');
+    
+    setTimeout(() => {
+        toast.classList.add('hidden');
+    }, 3000);
+}
 
 // --- SOUND SYSTEM ---
 function playSound(id) {
     try {
-        // Try to play from sounds folder
         const audio = new Audio(`sounds/${id}.mp3`);
         audio.volume = 0.5;
         audio.play().catch(() => {
-            // If sound file doesn't exist, use fallback beep
             playBeep(id);
         });
     } catch(e) {
-        // Fallback to beep sounds
         playBeep(id);
     }
 }
@@ -106,9 +161,7 @@ function playBeep(id) {
         
         oscillator.start(audioContext.currentTime);
         oscillator.stop(audioContext.currentTime + duration);
-    } catch(e) {
-        // Audio not supported
-    }
+    } catch(e) {}
 }
 
 // --- SAVE/LOAD SYSTEM ---
@@ -149,10 +202,21 @@ function resetGame() {
 
 // --- RANK SYSTEM ---
 function updateRank() {
+    oldRank = currentRank;
+    
     for (let i = RANKS.length - 1; i >= 0; i--) {
         if (points >= RANKS[i].minPoints) {
             currentRank = i;
             break;
+        }
+    }
+    
+    // Show rank change message
+    if (oldRank !== currentRank) {
+        if (currentRank > oldRank) {
+            showMessage(`RANK UP! ${RANKS[oldRank].name} → ${RANKS[currentRank].name}`, 'success');
+        } else if (currentRank < oldRank) {
+            showMessage(`RANK DOWN! ${RANKS[oldRank].name} → ${RANKS[currentRank].name}`, 'error');
         }
     }
 }
@@ -169,21 +233,6 @@ function updateRankDisplay() {
     if (pointsElement) pointsElement.textContent = points;
 }
 
-// --- GAME OVER SYSTEM ---
-function showGameOver() {
-    gameOver = true;
-    document.getElementById('game-over-title').textContent = "MISSION FAILED";
-    document.getElementById('game-over-message').textContent = "You have run out of gold!";
-    document.getElementById('game-over-panel').classList.remove('hidden');
-}
-
-function tryAgain() {
-    playSound('click');
-    gameOver = false;
-    document.getElementById('game-over-panel').classList.add('hidden');
-    startMission(); // Start fresh mission
-}
-
 // --- MISSION SYSTEM ---
 function startMission() {
     playSound('click');
@@ -191,7 +240,7 @@ function startMission() {
     // Reset game state for new mission
     coins = 0;
     currentGoal = 0;
-    gameOver = false;
+    missionStarted = false;
     
     // Random character
     const chars = Object.keys(CHARACTERS);
@@ -205,19 +254,20 @@ function startMission() {
     const startOptions = [15, 20, 25, 30];
     coins = startOptions[Math.floor(Math.random() * startOptions.length)];
     
-    // Random goal points (20, 25, 30, 35, or 40 only)
-    const goalOptions = [20, 25, 30, 35, 40];
+    // Random goal gold (30, 40, 50, 60, or 70 only)
+    const goalOptions = [30, 40, 50, 60, 70];
     currentGoal = goalOptions[Math.floor(Math.random() * goalOptions.length)];
     
     // Update briefing
     document.getElementById('character-message').textContent = 
         `${char.emoji} ${char.name}: "${randomMessage}"`;
     document.getElementById('character-goal').textContent = 
-        `Goal: Earn ${currentGoal} points`;
+        `Goal: Collect ${currentGoal} gold`;
     
     // Show briefing
     document.getElementById('main-menu').classList.add('hidden');
-    document.getElementById('game-over-panel').classList.add('hidden');
+    document.getElementById('mission-complete-panel').classList.add('hidden');
+    document.getElementById('mission-failed-panel').classList.add('hidden');
     document.getElementById('mission-briefing').classList.remove('hidden');
     
     // Update UI
@@ -226,6 +276,7 @@ function startMission() {
 
 function startGame() {
     playSound('click');
+    missionStarted = true;
     document.getElementById('mission-briefing').classList.add('hidden');
     document.getElementById('game-view').classList.remove('hidden');
     
@@ -242,43 +293,96 @@ function showInstructions() {
 function goToMainMenu() {
     playSound('click');
     
-    // Lose points for quitting mission
-    if (coins > 0 && !gameOver) {
-        const pointsLost = Math.floor(coins / 10);
-        points = Math.max(0, points - pointsLost);
-        totalPoints = Math.max(0, totalPoints - pointsLost);
-    }
-    
-    gameOver = false;
-    document.getElementById('game-over-panel').classList.add('hidden');
     const currentScreen = document.querySelector('.screen:not(.hidden)');
     if (currentScreen) {
         currentScreen.classList.add('hidden');
     }
     document.getElementById('main-menu').classList.remove('hidden');
     updateRankDisplay();
+    saveGame();
 }
 
 function returnToBase() {
     playSound('click');
     
-    // Lose points for quitting mission
-    if (coins > 0 && !gameOver) {
-        const pointsLost = Math.floor(coins / 10);
-        points = Math.max(0, points - pointsLost);
-        totalPoints = Math.max(0, totalPoints - pointsLost);
+    if (!missionStarted) {
+        goToMainMenu();
+        return;
     }
     
+    // Calculate points lost for quitting (5-15 points based on gold collected)
+    const pointsLost = Math.min(15, Math.max(5, Math.floor(coins / 5)));
+    const oldPoints = points;
+    points = Math.max(0, points - pointsLost);
+    totalPoints = Math.max(0, totalPoints - pointsLost);
+    
+    updateRank();
     saveGame();
-    gameOver = false;
+    
+    // Show mission failed panel
+    const char = CHARACTERS[currentCharacter];
+    const randomFailure = char.failureMessages[Math.floor(Math.random() * char.failureMessages.length)];
+    
+    document.getElementById('mission-failed-title').textContent = "MISSION ABANDONED";
+    document.getElementById('mission-failed-message').textContent = 
+        `${char.emoji} ${char.name}: "${randomFailure}"`;
+    document.getElementById('mission-failed-details').textContent = 
+        `You left the mission with ${coins} gold (needed ${currentGoal}).`;
+    
+    const rankChangeElement = document.getElementById('failed-rank-change');
+    rankChangeElement.textContent = `-${pointsLost} POINTS`;
+    rankChangeElement.className = 'rank-change down';
+    
     document.getElementById('game-view').classList.add('hidden');
-    document.getElementById('main-menu').classList.remove('hidden');
-    updateRankDisplay();
+    document.getElementById('mission-failed-panel').classList.remove('hidden');
+}
+
+function tryAgain() {
+    playSound('click');
+    document.getElementById('mission-failed-panel').classList.add('hidden');
+    startMission(); // Start fresh mission
 }
 
 function donate() {
     playSound('click');
     window.open('https://ko-fi.com', '_blank');
+}
+
+function completeMission() {
+    if (!missionStarted || coins < currentGoal) return;
+    
+    missionStarted = false;
+    
+    // Calculate points earned (10-25 points based on goal)
+    const pointsEarned = Math.min(25, Math.max(10, Math.floor(currentGoal / 3)));
+    const oldPoints = points;
+    points += pointsEarned;
+    totalPoints += pointsEarned;
+    
+    updateRank();
+    saveGame();
+    
+    // Show mission complete panel
+    const char = CHARACTERS[currentCharacter];
+    const randomSuccess = char.successMessages[Math.floor(Math.random() * char.successMessages.length)];
+    
+    document.getElementById('mission-complete-title').textContent = "MISSION COMPLETE";
+    document.getElementById('mission-character-message').textContent = 
+        `${char.emoji} ${char.name}: "${randomSuccess}"`;
+    document.getElementById('mission-complete-message').textContent = 
+        `You collected ${coins} gold (goal was ${currentGoal}).`;
+    document.getElementById('mission-reward').textContent = `+${pointsEarned} POINTS`;
+    
+    const rankChangeElement = document.getElementById('rank-change');
+    if (currentRank > oldRank) {
+        rankChangeElement.textContent = `RANK UP: ${RANKS[oldRank].name} → ${RANKS[currentRank].name}`;
+        rankChangeElement.className = 'rank-change';
+    } else {
+        rankChangeElement.textContent = '';
+    }
+    
+    document.getElementById('game-view').classList.add('hidden');
+    document.getElementById('mission-complete-panel').classList.remove('hidden');
 }
 
 // --- GAME ENGINE ---
@@ -331,7 +435,7 @@ function createSymbol(id) {
 function updateMissionIndicator() {
     const indicator = document.getElementById('mission-indicator');
     if (currentCharacter && currentGoal > 0) {
-        indicator.textContent = `${CHARACTERS[currentCharacter].name}: ${points}/${currentGoal}`;
+        indicator.textContent = `${CHARACTERS[currentCharacter].name}: ${coins}/${currentGoal} GOLD`;
     } else if (currentCharacter) {
         indicator.textContent = `${CHARACTERS[currentCharacter].name}`;
     }
@@ -339,7 +443,7 @@ function updateMissionIndicator() {
 
 // --- SPIN SYSTEM ---
 function startSpin() {
-    if (coins < 5 || busy || gameOver) return;
+    if (coins < 5 || busy || !missionStarted) return;
     busy = true;
     
     // Reset UI
@@ -457,45 +561,35 @@ function finalize(lines) {
     
     if (lines.length > 0) {
         let totalGold = 0;
-        let totalPointsEarned = 0;
         
         // Calculate rewards - ROUNDED TO MULTIPLES OF 5
         lines.forEach(line => {
             let goldReward = 0;
-            let pointsReward = 0;
             
             // Character symbols (1, 2, 3) give more
             switch(line.symbol) {
                 case 1: // Ninja (character)
                     goldReward = 30;
-                    pointsReward = 5;
                     break;
                 case 2: // Sword (character)
-                    goldReward = 20;
-                    pointsReward = 4;
+                    goldReward = 25;
                     break;
                 case 3: // Oni (character)
-                    goldReward = 25;
-                    pointsReward = 4;
+                    goldReward = 20;
                     break;
                 case 4: // Lantern (item)
                     goldReward = 10;
-                    pointsReward = 2;
                     break;
                 case 5: // Scroll (item)
-                    goldReward = 10; // Changed from 8 to 10
-                    pointsReward = 2;
+                    goldReward = 15;
                     break;
                 case 6: // Castle (special)
-                    goldReward = 20; // Changed from 15 to 20
-                    pointsReward = 3;
+                    goldReward = 35;
                     break;
                 default:
                     goldReward = 10;
-                    pointsReward = 2;
             }
             totalGold += goldReward;
-            totalPointsEarned += pointsReward;
             highlightLine(line);
         });
         
@@ -503,80 +597,75 @@ function finalize(lines) {
         if (lines.length > 1) {
             type.textContent = "BIG WIN!";
             totalGold = Math.floor(totalGold * 1.3);
-            totalPointsEarned = Math.floor(totalPointsEarned * 1.3);
         } else {
             type.textContent = "WIN!";
         }
         
-        // Round gold to nearest 5 and cap at 50
-        const finalGold = Math.min(50, Math.round(totalGold / 5) * 5);
+        // Round gold to nearest 5
+        const finalGold = Math.round(totalGold / 5) * 5;
         cash.textContent = `+${finalGold} GOLD`;
         
-        // Add gold and points
+        // Add gold
         coins += finalGold;
-        points += totalPointsEarned;
-        totalPoints += totalPointsEarned;
         
         updateUI();
-        updateRank();
         updateMissionIndicator();
         
-        // Check if goal reached
-        if (currentGoal > 0 && points >= currentGoal) {
-            setTimeout(() => {
-                type.textContent = "GOAL REACHED!";
-                cash.textContent = `Mission Complete!`;
-                // Bonus points for reaching goal
-                points += 10;
-                totalPoints += 10;
-                updateUI();
-                updateRank();
-                updateMissionIndicator();
-                saveGame();
-            }, 1000);
-        }
-        
         playSound('win');
+        
+        // Check if goal reached
+        if (coins >= currentGoal) {
+            setTimeout(() => {
+                completeMission();
+            }, 1500);
+            return;
+        }
         
     } else {
         type.textContent = "FAILED";
         cash.textContent = "No matches";
-        
-        // Lose 1 point for failed spin
-        points = Math.max(0, points - 1);
-        totalPoints = Math.max(0, totalPoints - 1);
-        updateRank();
-        updateMissionIndicator();
         
         playSound('lose');
         
         // Check if out of coins
         if (coins < 5) {
             setTimeout(() => {
-                type.textContent = "MISSION FAILED";
-                cash.textContent = "No gold left";
+                // Calculate points lost for failure (10-20 points)
+                const pointsLost = Math.min(20, Math.max(10, Math.floor(currentGoal / 5)));
+                const oldPoints = points;
+                points = Math.max(0, points - pointsLost);
+                totalPoints = Math.max(0, totalPoints - pointsLost);
                 
-                // Lose more points for mission failure
-                points = Math.max(0, points - 5);
-                totalPoints = Math.max(0, totalPoints - 5);
                 updateRank();
-                updateMissionIndicator();
+                saveGame();
                 
-                // Show game over panel
-                setTimeout(() => {
-                    showGameOver();
-                }, 1500);
-            }, 1000);
+                // Show mission failed panel
+                const char = CHARACTERS[currentCharacter];
+                const randomFailure = char.failureMessages[Math.floor(Math.random() * char.failureMessages.length)];
+                
+                document.getElementById('mission-failed-title').textContent = "MISSION FAILED";
+                document.getElementById('mission-failed-message').textContent = 
+                    `${char.emoji} ${char.name}: "${randomFailure}"`;
+                document.getElementById('mission-failed-details').textContent = 
+                    `You ran out of gold! Collected ${coins} gold (needed ${currentGoal}).`;
+                
+                const rankChangeElement = document.getElementById('failed-rank-change');
+                rankChangeElement.textContent = `-${pointsLost} POINTS`;
+                rankChangeElement.className = 'rank-change down';
+                
+                document.getElementById('game-view').classList.add('hidden');
+                document.getElementById('mission-failed-panel').classList.remove('hidden');
+            }, 1500);
+            return;
         }
     }
     
     // Reset for next spin
     setTimeout(() => {
         busy = false;
-        if (coins >= 5 && !gameOver) {
+        if (coins >= 5 && missionStarted) {
             document.getElementById('spin-btn').classList.remove('hidden-btn');
         }
-        saveGame();
     }, 2000);
 }
 
@@ -618,7 +707,7 @@ function updateUI() {
     // Update spin button state
     const spinBtn = document.getElementById('spin-btn');
     if (spinBtn) {
-        if (coins < 5 || gameOver) {
+        if (coins < 5 || !missionStarted) {
             spinBtn.disabled = true;
             spinBtn.style.opacity = '0.5';
         } else {
@@ -641,7 +730,7 @@ window.onload = function() {
 // --- KEYBOARD CONTROLS ---
 document.addEventListener('keydown', function(e) {
     const gameView = document.getElementById('game-view');
-    if (!gameView || gameView.classList.contains('hidden') || gameOver) return;
+    if (!gameView || gameView.classList.contains('hidden') || !missionStarted) return;
     
     switch(e.key) {
         case ' ':
