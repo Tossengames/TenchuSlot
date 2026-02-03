@@ -1,5 +1,5 @@
 // ============================================
-// TENCHU: SHADOW MISSION - FINAL VERSION
+// TENCHU: SHADOW MISSION - FINAL CORRECTED VERSION
 // ============================================
 
 // --- GAME CONFIGURATION ---
@@ -57,6 +57,7 @@ let currentGoal = 0;
 let isSpinning = [false, false, false];
 let grid = [[], [], []];
 let busy = false;
+let gameOver = false;
 
 // --- SOUND SYSTEM ---
 function playSound(id) {
@@ -168,9 +169,29 @@ function updateRankDisplay() {
     if (pointsElement) pointsElement.textContent = points;
 }
 
+// --- GAME OVER SYSTEM ---
+function showGameOver() {
+    gameOver = true;
+    document.getElementById('game-over-title').textContent = "MISSION FAILED";
+    document.getElementById('game-over-message').textContent = "You have run out of gold!";
+    document.getElementById('game-over-panel').classList.remove('hidden');
+}
+
+function tryAgain() {
+    playSound('click');
+    gameOver = false;
+    document.getElementById('game-over-panel').classList.add('hidden');
+    startMission(); // Start fresh mission
+}
+
 // --- MISSION SYSTEM ---
 function startMission() {
     playSound('click');
+    
+    // Reset game state for new mission
+    coins = 0;
+    currentGoal = 0;
+    gameOver = false;
     
     // Random character
     const chars = Object.keys(CHARACTERS);
@@ -180,11 +201,13 @@ function startMission() {
     // Random message
     const randomMessage = char.messages[Math.floor(Math.random() * char.messages.length)];
     
-    // Random starting coins (15-30)
-    coins = 15 + Math.floor(Math.random() * 16);
+    // Random starting coins (15, 20, 25, or 30 only)
+    const startOptions = [15, 20, 25, 30];
+    coins = startOptions[Math.floor(Math.random() * startOptions.length)];
     
-    // Random goal points (20-40)
-    currentGoal = 20 + Math.floor(Math.random() * 21);
+    // Random goal points (20, 25, 30, 35, or 40 only)
+    const goalOptions = [20, 25, 30, 35, 40];
+    currentGoal = goalOptions[Math.floor(Math.random() * goalOptions.length)];
     
     // Update briefing
     document.getElementById('character-message').textContent = 
@@ -194,6 +217,7 @@ function startMission() {
     
     // Show briefing
     document.getElementById('main-menu').classList.add('hidden');
+    document.getElementById('game-over-panel').classList.add('hidden');
     document.getElementById('mission-briefing').classList.remove('hidden');
     
     // Update UI
@@ -217,6 +241,16 @@ function showInstructions() {
 
 function goToMainMenu() {
     playSound('click');
+    
+    // Lose points for quitting mission
+    if (coins > 0 && !gameOver) {
+        const pointsLost = Math.floor(coins / 10);
+        points = Math.max(0, points - pointsLost);
+        totalPoints = Math.max(0, totalPoints - pointsLost);
+    }
+    
+    gameOver = false;
+    document.getElementById('game-over-panel').classList.add('hidden');
     const currentScreen = document.querySelector('.screen:not(.hidden)');
     if (currentScreen) {
         currentScreen.classList.add('hidden');
@@ -229,13 +263,14 @@ function returnToBase() {
     playSound('click');
     
     // Lose points for quitting mission
-    if (coins > 0) {
+    if (coins > 0 && !gameOver) {
         const pointsLost = Math.floor(coins / 10);
         points = Math.max(0, points - pointsLost);
         totalPoints = Math.max(0, totalPoints - pointsLost);
     }
     
     saveGame();
+    gameOver = false;
     document.getElementById('game-view').classList.add('hidden');
     document.getElementById('main-menu').classList.remove('hidden');
     updateRankDisplay();
@@ -295,14 +330,16 @@ function createSymbol(id) {
 
 function updateMissionIndicator() {
     const indicator = document.getElementById('mission-indicator');
-    if (currentCharacter) {
+    if (currentCharacter && currentGoal > 0) {
+        indicator.textContent = `${CHARACTERS[currentCharacter].name}: ${points}/${currentGoal}`;
+    } else if (currentCharacter) {
         indicator.textContent = `${CHARACTERS[currentCharacter].name}`;
     }
 }
 
 // --- SPIN SYSTEM ---
 function startSpin() {
-    if (coins < 5 || busy) return;
+    if (coins < 5 || busy || gameOver) return;
     busy = true;
     
     // Reset UI
@@ -422,7 +459,7 @@ function finalize(lines) {
         let totalGold = 0;
         let totalPointsEarned = 0;
         
-        // Calculate rewards
+        // Calculate rewards - ROUNDED TO MULTIPLES OF 5
         lines.forEach(line => {
             let goldReward = 0;
             let pointsReward = 0;
@@ -446,11 +483,11 @@ function finalize(lines) {
                     pointsReward = 2;
                     break;
                 case 5: // Scroll (item)
-                    goldReward = 8;
-                    pointsReward = 1;
+                    goldReward = 10; // Changed from 8 to 10
+                    pointsReward = 2;
                     break;
                 case 6: // Castle (special)
-                    goldReward = 15;
+                    goldReward = 20; // Changed from 15 to 20
                     pointsReward = 3;
                     break;
                 default:
@@ -471,8 +508,8 @@ function finalize(lines) {
             type.textContent = "WIN!";
         }
         
-        // Cap gold at 50
-        const finalGold = Math.min(50, totalGold);
+        // Round gold to nearest 5 and cap at 50
+        const finalGold = Math.min(50, Math.round(totalGold / 5) * 5);
         cash.textContent = `+${finalGold} GOLD`;
         
         // Add gold and points
@@ -482,12 +519,20 @@ function finalize(lines) {
         
         updateUI();
         updateRank();
+        updateMissionIndicator();
         
         // Check if goal reached
         if (currentGoal > 0 && points >= currentGoal) {
             setTimeout(() => {
                 type.textContent = "GOAL REACHED!";
                 cash.textContent = `Mission Complete!`;
+                // Bonus points for reaching goal
+                points += 10;
+                totalPoints += 10;
+                updateUI();
+                updateRank();
+                updateMissionIndicator();
+                saveGame();
             }, 1000);
         }
         
@@ -501,6 +546,7 @@ function finalize(lines) {
         points = Math.max(0, points - 1);
         totalPoints = Math.max(0, totalPoints - 1);
         updateRank();
+        updateMissionIndicator();
         
         playSound('lose');
         
@@ -514,6 +560,12 @@ function finalize(lines) {
                 points = Math.max(0, points - 5);
                 totalPoints = Math.max(0, totalPoints - 5);
                 updateRank();
+                updateMissionIndicator();
+                
+                // Show game over panel
+                setTimeout(() => {
+                    showGameOver();
+                }, 1500);
             }, 1000);
         }
     }
@@ -521,7 +573,7 @@ function finalize(lines) {
     // Reset for next spin
     setTimeout(() => {
         busy = false;
-        if (coins >= 5) {
+        if (coins >= 5 && !gameOver) {
             document.getElementById('spin-btn').classList.remove('hidden-btn');
         }
         saveGame();
@@ -566,7 +618,7 @@ function updateUI() {
     // Update spin button state
     const spinBtn = document.getElementById('spin-btn');
     if (spinBtn) {
-        if (coins < 5) {
+        if (coins < 5 || gameOver) {
             spinBtn.disabled = true;
             spinBtn.style.opacity = '0.5';
         } else {
@@ -589,7 +641,7 @@ window.onload = function() {
 // --- KEYBOARD CONTROLS ---
 document.addEventListener('keydown', function(e) {
     const gameView = document.getElementById('game-view');
-    if (!gameView || gameView.classList.contains('hidden')) return;
+    if (!gameView || gameView.classList.contains('hidden') || gameOver) return;
     
     switch(e.key) {
         case ' ':
