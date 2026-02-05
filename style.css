@@ -378,7 +378,7 @@ button:not(:disabled):active {
 }
 
 /* ============================================
-   GAME VIEW - SIMPLE ONE-LINE STATS
+   GAME VIEW - TWO LINE STATS
    ============================================ */
 #game-view.screen {
     padding: 10px;
@@ -387,12 +387,12 @@ button:not(:disabled):active {
     overflow-y: auto;
 }
 
-/* Game Header - ONE LINE STATS - LARGER TEXT */
+/* Game Header - TWO LINE STATS */
 .game-header {
     width: 100%;
     display: flex;
-    align-items: center;
-    justify-content: space-between;
+    flex-direction: column;
+    gap: 8px;
     padding: 10px 15px;
     background: linear-gradient(to bottom, 
         rgba(5, 5, 16, 0.95) 0%, 
@@ -401,56 +401,104 @@ button:not(:disabled):active {
     position: sticky;
     top: 0;
     z-index: 10;
-    gap: 10px;
-    min-height: 60px;
+    min-height: 90px;
 }
 
-/* Stats Container - Single Line - BIGGER TEXT */
+/* Stats Container - Two Lines */
 .stats-container {
-    flex: 1;
     display: flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 0;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
 }
 
-#stats-text {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--gold);
-    background: rgba(20, 20, 40, 0.9);
-    padding: 8px 15px;
-    border-radius: 10px;
-    border: 2px solid rgba(255, 51, 85, 0.4);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    text-align: center;
+/* First Line: GOLD and NEED */
+.stats-line-1 {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
     width: 100%;
-    max-width: 500px;
-    box-shadow: 0 0 15px rgba(255, 0, 51, 0.3);
-    text-shadow: 0 0 10px rgba(255, 204, 0, 0.5);
+}
+
+/* Second Line: COLLECTED and Progress */
+.stats-line-2 {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+
+/* Individual Stat Boxes */
+.stat-box {
+    flex: 1;
+    background: rgba(20, 20, 40, 0.9);
+    border-radius: 10px;
+    padding: 8px 12px;
+    border: 2px solid rgba(255, 51, 85, 0.4);
+    text-align: center;
+    min-width: 0;
+    box-shadow: 0 0 10px rgba(255, 0, 51, 0.2);
+}
+
+.stat-box.gold {
+    border-color: rgba(255, 204, 0, 0.4);
+}
+
+.stat-box.need {
+    border-color: rgba(255, 51, 85, 0.4);
+}
+
+.stat-box.collected {
+    border-color: rgba(0, 204, 102, 0.4);
+}
+
+.stat-label {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-dim);
+    margin-bottom: 4px;
+    text-transform: uppercase;
     letter-spacing: 0.5px;
+}
+
+.stat-value {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 20px;
+    font-weight: 900;
+    color: var(--text-light);
+    text-shadow: 0 0 8px currentColor;
+}
+
+.stat-value.gold-value {
+    color: var(--gold);
+}
+
+.stat-value.need-value {
+    color: var(--crimson);
+}
+
+.stat-value.collected-value {
+    color: #00cc66;
 }
 
 /* Mission Progress */
 .mission-progress-container {
-    flex-shrink: 0;
-    min-width: 70px;
+    flex: 1;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    gap: 4px;
+    min-width: 120px;
+    max-width: 200px;
 }
 
 .progress-track {
     width: 100%;
-    height: 6px;
+    height: 8px;
     background: rgba(255, 255, 255, 0.1);
-    border-radius: 3px;
+    border-radius: 4px;
     overflow: hidden;
-    margin-bottom: 4px;
 }
 
 #mission-progress {
@@ -464,7 +512,7 @@ button:not(:disabled):active {
     font-size: 12px;
     color: var(--text-light);
     font-weight: 600;
-    white-space: nowrap;
+    text-align: center;
     text-shadow: 0 0 5px rgba(255, 204, 0, 0.5);
 }
 
@@ -706,7 +754,7 @@ button:not(:disabled):active {
     white-space: nowrap;
 }
 
-/* Result Panel - OVERLAY ON TOP OF SPIN BUTTON */
+/* Result Panel - OVERLAY */
 #result-panel {
     width: 100%;
     max-width: 350px;
@@ -725,7 +773,7 @@ button:not(:disabled):active {
     transform: translate(-50%, -50%);
     z-index: 100;
     backdrop-filter: blur(15px);
-    display: none; /* Hidden by default, shown with JavaScript */
+    display: none;
     flex-direction: column;
     align-items: center;
     justify-content: center;
@@ -853,6 +901,11 @@ button:not(:disabled):active {
     box-shadow: 
         0 0 45px rgba(255, 204, 0, 0.8),
         0 8px 25px rgba(0, 0, 0, 0.5);
+}
+
+.btn-spin:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
 }
 
 .spin-glow {
@@ -1623,22 +1676,34 @@ kbd {
         margin: 5px;
     }
     
-    #stats-text {
+    .stat-box {
+        padding: 6px 10px;
+    }
+    
+    .stat-label {
+        font-size: 10px;
+    }
+    
+    .stat-value {
         font-size: 16px;
-        padding: 7px 12px;
     }
     
     .game-header {
         padding: 8px 12px;
-        min-height: 55px;
+        min-height: 80px;
+    }
+    
+    .stats-line-1,
+    .stats-line-2 {
+        gap: 5px;
     }
     
     .mission-progress-container {
-        min-width: 60px;
+        min-width: 100px;
     }
     
     #mission-progress-text {
-        font-size: 11px;
+        font-size: 10px;
     }
     
     .feedback-panel {
@@ -1690,6 +1755,7 @@ kbd {
     
     .game-header {
         padding: 8px;
+        min-height: 70px;
     }
     
     .slot-container {
@@ -1715,8 +1781,12 @@ kbd {
         font-size: 1.8rem;
     }
     
-    #stats-text {
+    .stat-value {
         font-size: 14px;
+    }
+    
+    .stat-label {
+        font-size: 9px;
     }
     
     .glitch-title {
