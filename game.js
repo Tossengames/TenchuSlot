@@ -1,32 +1,32 @@
 // ============================================
-// TENCHU: SHADOW MISSION - MODERN ENHANCED VERSION
+// TENCHU: SHADOW MISSION
 // ============================================
 
-// --- MODERN CONFIGURATION ---
+// --- GAME CONFIG ---
 const SYMBOLS = 6;
 const EMOJIS = ['🥷', '🗡️', '🏮', '👺', '📜', '🏯'];
 const SYMBOL_NAMES = ['Ninja', 'Sword', 'Lantern', 'Oni', 'Scroll', 'Castle'];
 
-// Enhanced Character database with images
+// Character database with Tenchu lore
 const CHARACTERS = {
     rikimaru: {
         name: "RIKIMARU",
         emoji: "🥷",
         color: "#3366cc",
         messages: [
-            "The Azure Dragon needs your help.",
-            "Lord Gohda requires your service.",
-            "Azuma village is counting on you."
+            "Lord Gohda's castle needs funds for defense.",
+            "Azuma villagers need supplies for winter.",
+            "Master Tatsumaru's rebellion threatens our lands."
         ],
         successMessages: [
-            "Excellent work. The Azure Dragon is pleased.",
-            "Your service honors Lord Gohda.",
-            "Azuma village will remember your contribution."
+            "Lord Gohda is pleased. The castle is secure.",
+            "The villagers will survive winter thanks to you.",
+            "Your contribution strengthens our position."
         ],
         failureMessages: [
-            "You have dishonored the Azure Dragon.",
-            "Lord Gohda will hear of this failure.",
-            "Azuma village suffers because of you."
+            "Lord Gohda is disappointed in your failure.",
+            "The villagers will suffer without supplies.",
+            "The rebellion gains ground due to your failure."
         ]
     },
     ayame: {
@@ -34,19 +34,19 @@ const CHARACTERS = {
         emoji: "⚔️",
         color: "#cc3366",
         messages: [
-            "The Crimson Lily needs assistance.",
-            "Our sisters require your aid.",
-            "Help us gather what we need."
+            "The Crimson Lily Clan needs funding.",
+            "Our wounded sisters need medicine.",
+            "We need resources to track Lord Meiou."
         ],
         successMessages: [
-            "The Crimson Lily thanks you for your service.",
-            "Our sisters are grateful for your help.",
-            "You have served the kunoichi well."
+            "The Crimson Lily Clan thanks you.",
+            "Our sisters will recover with this medicine.",
+            "Now we can monitor Lord Meiou's activities."
         ],
         failureMessages: [
-            "You have failed the Crimson Lily.",
-            "Our sisters are disappointed.",
-            "You bring shame to our order."
+            "The Crimson Lily Clan's operations are hindered.",
+            "Our sisters suffer without proper care.",
+            "Lord Meiou moves unchecked."
         ]
     },
     tatsumaru: {
@@ -54,24 +54,24 @@ const CHARACTERS = {
         emoji: "👺",
         color: "#33cc66",
         messages: [
-            "The Green Viper seeks your help.",
-            "Join our cause, shinobi.",
-            "We need resources for the rebellion."
+            "The rebellion needs funding to continue.",
+            "My followers need weapons and supplies.",
+            "Help us liberate the people from oppression."
         ],
         successMessages: [
-            "The Green Viper is pleased with your work.",
-            "You serve the rebellion well.",
-            "Your contribution will be remembered."
+            "The rebellion grows stronger with your help.",
+            "My followers are now properly equipped.",
+            "The people will remember your support."
         ],
         failureMessages: [
-            "You have failed the Green Viper.",
-            "The rebellion suffers because of you.",
-            "You are not worthy of our cause."
+            "The rebellion struggles without funding.",
+            "My followers fight with inadequate weapons.",
+            "The people continue to suffer."
         ]
     }
 };
 
-// Enhanced Ranking System with levels
+// Ranking System
 const RANKS = [
     { name: "INITIATE", minPoints: 0, color: "#666666", level: 1 },
     { name: "SHINOBI", minPoints: 50, color: "#3366cc", level: 2 },
@@ -95,119 +95,83 @@ let grid = [[], [], []];
 let busy = false;
 let soundEnabled = true;
 let lastWinAmount = 0;
+let bgMusic = null;
 
 // --- UTILITY FUNCTIONS ---
-function showEnhancedMessage(text, type = 'info', duration = 3000) {
+function showMessage(text, type = 'info', duration = 3000) {
     const toast = document.getElementById('message-toast');
+    const feedbackPanel = document.getElementById('feedback-panel');
+    const feedbackText = document.getElementById('feedback-text');
+    
+    // Update toast
     toast.textContent = text;
     toast.className = '';
-    
-    // Set styles based on type
-    switch(type) {
-        case 'success':
-            toast.style.color = '#00cc66';
-            toast.style.borderColor = '#00cc66';
-            toast.style.boxShadow = '0 0 30px rgba(0, 204, 102, 0.5)';
-            break;
-        case 'warning':
-            toast.style.color = '#ff9900';
-            toast.style.borderColor = '#ff9900';
-            toast.style.boxShadow = '0 0 30px rgba(255, 153, 0, 0.5)';
-            break;
-        case 'error':
-            toast.style.color = '#ff3333';
-            toast.style.borderColor = '#ff3333';
-            toast.style.boxShadow = '0 0 30px rgba(255, 51, 51, 0.5)';
-            break;
-        default:
-            toast.style.color = '#ffcc00';
-            toast.style.borderColor = '#ff3300';
-            toast.style.boxShadow = '0 0 30px rgba(255, 51, 0, 0.5)';
-    }
-    
+    toast.style.color = type === 'success' ? '#00cc66' : 
+                       type === 'error' ? '#ff3333' : '#ffcc00';
     toast.classList.remove('hidden');
+    
+    // Update feedback panel
+    if (feedbackPanel && feedbackText) {
+        feedbackText.textContent = text;
+        feedbackPanel.className = 'feedback-panel ' + type;
+        feedbackPanel.classList.remove('hidden');
+        
+        // Auto-hide feedback after duration
+        setTimeout(() => {
+            feedbackPanel.classList.add('hidden');
+        }, duration);
+    }
     
     setTimeout(() => {
         toast.classList.add('hidden');
     }, duration);
 }
 
-// --- ENHANCED SOUND SYSTEM ---
-function playEnhancedSound(id) {
+// --- SOUND SYSTEM ---
+function initAudio() {
+    // Create background music
+    bgMusic = new Audio(`sounds/bg-music.mp3`);
+    bgMusic.loop = true;
+    bgMusic.volume = 0.3;
+    
+    // Try to autoplay
+    if (soundEnabled) {
+        try {
+            bgMusic.play().catch(() => {});
+        } catch(e) {}
+    }
+}
+
+function playSound(id) {
     if (!soundEnabled) return;
     
     try {
         const audio = new Audio(`sounds/${id}.mp3`);
         audio.volume = 0.5;
-        audio.play().catch(() => {
-            playBeep(id);
-        });
-    } catch(e) {
-        playBeep(id);
-    }
-}
-
-function playBeep(id) {
-    try {
-        const audioContext = new (AudioContext || webkitAudioContext)();
-        const oscillator = audioContext.createOscillator();
-        const gainNode = audioContext.createGain();
-        
-        oscillator.connect(gainNode);
-        gainNode.connect(audioContext.destination);
-        
-        let frequency = 800;
-        let duration = 0.1;
-        
-        if (id === 'win') {
-            frequency = 523.25;
-            duration = 0.3;
-        } else if (id === 'lose') {
-            frequency = 392;
-            duration = 0.3;
-        } else if (id === 'spin') {
-            frequency = 400;
-            duration = 0.2;
-        } else if (id === 'mission-start') {
-            frequency = 659.25; // E5
-            duration = 0.5;
-        } else if (id === 'mission-complete') {
-            frequency = 880; // A5
-            duration = 0.8;
-        } else if (id === 'mission-fail') {
-            frequency = 293.66; // D4
-            duration = 0.6;
-        } else if (id === 'rank-up') {
-            frequency = 1046.50; // C6
-            duration = 1.0;
-        }
-        
-        oscillator.frequency.value = frequency;
-        oscillator.type = 'sine';
-        
-        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
-        
-        oscillator.start(audioContext.currentTime);
-        oscillator.stop(audioContext.currentTime + duration);
+        audio.play().catch(() => {});
     } catch(e) {}
 }
 
 function toggleSound() {
     soundEnabled = !soundEnabled;
-    const icon = document.getElementById('sound-icon');
     const globalIcon = document.getElementById('global-sound-icon');
     
     if (soundEnabled) {
-        if (icon) icon.className = 'fas fa-volume-up';
         if (globalIcon) globalIcon.className = 'fas fa-volume-up';
-        playEnhancedSound('click');
+        playSound('click');
+        
+        // Start background music if not playing
+        if (bgMusic && bgMusic.paused) {
+            bgMusic.play().catch(() => {});
+        }
     } else {
-        if (icon) icon.className = 'fas fa-volume-mute';
         if (globalIcon) globalIcon.className = 'fas fa-volume-mute';
+        
+        // Pause all audio
+        if (bgMusic) bgMusic.pause();
     }
     
-    showEnhancedMessage(`Sound ${soundEnabled ? 'Enabled' : 'Disabled'}`, 'info', 1500);
+    showMessage(`Sound ${soundEnabled ? 'Enabled' : 'Disabled'}`, 'info', 1500);
 }
 
 // --- SAVE/LOAD SYSTEM ---
@@ -217,13 +181,12 @@ function saveGame() {
         totalPoints: totalPoints,
         timestamp: Date.now()
     };
-    
-    localStorage.setItem('tenchu_modern_save', JSON.stringify(gameData));
+    localStorage.setItem('tenchu_save', JSON.stringify(gameData));
     updateRankDisplay();
 }
 
 function loadGame() {
-    const saved = localStorage.getItem('tenchu_modern_save');
+    const saved = localStorage.getItem('tenchu_save');
     if (saved) {
         try {
             const data = JSON.parse(saved);
@@ -259,13 +222,10 @@ function updateRank() {
         }
     }
     
-    // Show rank change message
     if (oldRank !== currentRank) {
         if (currentRank > oldRank) {
-            showEnhancedMessage(`RANK UP! ${RANKS[oldRank].name} → ${RANKS[currentRank].name}`, 'success');
-            playEnhancedSound('rank-up');
-        } else if (currentRank < oldRank) {
-            showEnhancedMessage(`RANK DOWN! ${RANKS[oldRank].name} → ${RANKS[currentRank].name}`, 'error');
+            showMessage(`RANK UP! ${RANKS[oldRank].name} → ${RANKS[currentRank].name}`, 'success');
+            playSound('rank-up');
         }
     }
 }
@@ -291,20 +251,12 @@ function updateRankProgress() {
     const rankLevel = document.getElementById('rank-level');
     const nextPoints = document.getElementById('next-rank-points');
     
-    if (progressFill) {
-        progressFill.style.width = `${Math.min(100, Math.max(0, progress))}%`;
-    }
-    
-    if (rankLevel) {
-        rankLevel.textContent = RANKS[currentRank].level;
-    }
-    
-    if (nextPoints) {
-        nextPoints.textContent = nextRankPoints;
-    }
+    if (progressFill) progressFill.style.width = `${Math.min(100, Math.max(0, progress))}%`;
+    if (rankLevel) rankLevel.textContent = RANKS[currentRank].level;
+    if (nextPoints) nextPoints.textContent = nextRankPoints;
 }
 
-// --- RESET GAME STATE FOR NEW MISSION ---
+// --- RESET MISSION STATE ---
 function resetMissionState() {
     coins = 0;
     collectedGold = 0;
@@ -328,7 +280,10 @@ function resetMissionState() {
     if (resultPanel) resultPanel.classList.add('hidden');
     
     const spinBtn = document.getElementById('spin-btn');
-    if (spinBtn) spinBtn.classList.remove('hidden-btn');
+    if (spinBtn) {
+        spinBtn.style.display = 'flex';
+        spinBtn.disabled = false;
+    }
     
     // Remove winning highlights
     document.querySelectorAll('.symbol').forEach(s => s.classList.remove('winning-symbol'));
@@ -338,9 +293,7 @@ function resetMissionState() {
 
 // --- MISSION SYSTEM ---
 function startMission() {
-    playEnhancedSound('click');
-    
-    // Reset game state completely for new mission
+    playSound('click');
     resetMissionState();
     
     // Random character
@@ -348,25 +301,25 @@ function startMission() {
     currentCharacter = chars[Math.floor(Math.random() * chars.length)];
     const char = CHARACTERS[currentCharacter];
     
-    // Update character display
+    // Update character display - NO IMAGE, just name
     document.getElementById('character-name').textContent = char.name;
-    document.getElementById('character-portrait').textContent = char.emoji;
+    document.getElementById('character-portrait').innerHTML = char.emoji;
     document.getElementById('character-portrait').style.background = `linear-gradient(135deg, ${char.color}, #000)`;
     
     // Random message
     const randomMessage = char.messages[Math.floor(Math.random() * char.messages.length)];
     document.getElementById('character-message').textContent = `"${randomMessage}"`;
     
-    // Random starting gold (15, 20, 25, or 30 only)
+    // Random starting gold
     const startOptions = [15, 20, 25, 30];
     coins = startOptions[Math.floor(Math.random() * startOptions.length)];
     collectedGold = 0;
     
-    // Random goal for collected gold (30, 40, 50, 60, or 70 only)
+    // Random goal
     const goalOptions = [30, 40, 50, 60, 70];
     currentGoal = goalOptions[Math.floor(Math.random() * goalOptions.length)];
     
-    // Update briefing displays
+    // Update briefing
     document.getElementById('character-goal').textContent = `Collect ${currentGoal} more gold`;
     document.getElementById('starting-gold').textContent = `${coins} gold available`;
     
@@ -376,38 +329,32 @@ function startMission() {
     document.getElementById('mission-failed-panel').classList.add('hidden');
     document.getElementById('mission-briefing').classList.remove('hidden');
     
-    // Update UI
     updateUI();
 }
 
 function startGame() {
-    playEnhancedSound('mission-start');
+    playSound('mission-start');
     missionStarted = true;
     document.getElementById('mission-briefing').classList.add('hidden');
     document.getElementById('game-view').classList.remove('hidden');
     
-    updateMissionIndicator();
+    updateStats();
     updateMissionProgress();
-    updateCollectedGoldDisplay();
     initMachine();
 }
 
 function showInstructions() {
-    playEnhancedSound('click');
+    playSound('click');
     document.getElementById('main-menu').classList.add('hidden');
     document.getElementById('info-screen').classList.remove('hidden');
 }
 
 function goToMainMenu() {
-    playEnhancedSound('click');
-    
-    // Reset mission state when returning to menu
+    playSound('click');
     resetMissionState();
     
     const currentScreen = document.querySelector('.screen:not(.hidden)');
-    if (currentScreen) {
-        currentScreen.classList.add('hidden');
-    }
+    if (currentScreen) currentScreen.classList.add('hidden');
     document.getElementById('main-menu').classList.remove('hidden');
     updateRankDisplay();
     updateRankProgress();
@@ -415,14 +362,14 @@ function goToMainMenu() {
 }
 
 function returnToBase() {
-    playEnhancedSound('click');
+    playSound('click');
     
     if (!missionStarted) {
         goToMainMenu();
         return;
     }
     
-    // Calculate points lost for quitting (5-15 points based on gold collected)
+    // Calculate points lost
     const pointsLost = Math.min(15, Math.max(5, Math.floor(collectedGold / 5)));
     const oldPoints = points;
     points = Math.max(0, points - pointsLost);
@@ -440,7 +387,7 @@ function returnToBase() {
     document.getElementById('mission-failed-message').textContent = 
         `${char.emoji} ${char.name}: "${randomFailure}"`;
     document.getElementById('mission-failed-details').textContent = 
-        `Collected: ${collectedGold} gold | Needed: ${currentGoal} gold | Total: ${coins} gold`;
+        `Collected: ${collectedGold} gold | Needed: ${currentGoal} gold`;
     
     const rankChangeElement = document.getElementById('failed-rank-change');
     rankChangeElement.textContent = `-${pointsLost} POINTS`;
@@ -448,12 +395,7 @@ function returnToBase() {
     document.getElementById('game-view').classList.add('hidden');
     document.getElementById('mission-failed-panel').classList.remove('hidden');
     
-    playEnhancedSound('mission-fail');
-}
-
-function donate() {
-    playEnhancedSound('click');
-    window.open('https://ko-fi.com', '_blank');
+    playSound('mission-fail');
 }
 
 function completeMission() {
@@ -461,7 +403,7 @@ function completeMission() {
     
     missionStarted = false;
     
-    // Calculate points earned (10-25 points based on goal)
+    // Calculate points earned
     const pointsEarned = Math.min(25, Math.max(10, Math.floor(currentGoal / 3)));
     const oldPoints = points;
     points += pointsEarned;
@@ -479,7 +421,7 @@ function completeMission() {
     document.getElementById('mission-character-message').textContent = 
         `${char.emoji} ${char.name}: "${randomSuccess}"`;
     document.getElementById('mission-complete-message').textContent = 
-        `Collected: ${collectedGold} gold | Goal: ${currentGoal} gold | Total: ${coins} gold`;
+        `Collected: ${collectedGold} gold | Goal: ${currentGoal} gold`;
     document.getElementById('mission-reward').textContent = `+${pointsEarned} POINTS`;
     
     const rankChangeContainer = document.getElementById('rank-change-container');
@@ -490,7 +432,7 @@ function completeMission() {
         rankChangeTitle.textContent = "RANK UP ACHIEVED!";
         rankChange.textContent = `${RANKS[oldRank].name} → ${RANKS[currentRank].name}`;
         rankChangeContainer.style.display = 'flex';
-        playEnhancedSound('rank-up');
+        playSound('rank-up');
     } else {
         rankChangeContainer.style.display = 'none';
     }
@@ -498,35 +440,25 @@ function completeMission() {
     document.getElementById('game-view').classList.add('hidden');
     document.getElementById('mission-complete-panel').classList.remove('hidden');
     
-    playEnhancedSound('mission-complete');
+    playSound('mission-complete');
 }
 
-// --- ENHANCED UI FUNCTIONS ---
+// --- UI FUNCTIONS ---
+function updateStats() {
+    // Update the single line stats display
+    const statsText = document.getElementById('stats-text');
+    if (statsText) {
+        statsText.innerHTML = `GOLD: ${coins} | NEED: ${currentGoal} | COLLECTED: ${collectedGold}`;
+    }
+}
+
 function updateMissionProgress() {
     const progressFill = document.getElementById('mission-progress');
     const progressText = document.getElementById('mission-progress-text');
     const progress = Math.min(100, (collectedGold / currentGoal) * 100);
     
-    if (progressFill) {
-        progressFill.style.width = `${progress}%`;
-    }
-    
-    if (progressText) {
-        progressText.textContent = `${Math.round(progress)}%`;
-    }
-}
-
-function updateCollectedGoldDisplay() {
-    const collectedElement = document.getElementById('collected-gold');
-    if (collectedElement) {
-        collectedElement.textContent = collectedGold;
-        
-        // Add bounce animation
-        collectedElement.classList.add('coin-bounce');
-        setTimeout(() => {
-            collectedElement.classList.remove('coin-bounce');
-        }, 500);
-    }
+    if (progressFill) progressFill.style.width = `${progress}%`;
+    if (progressText) progressText.textContent = `${Math.round(progress)}%`;
 }
 
 // --- GAME ENGINE ---
@@ -576,29 +508,23 @@ function createSymbol(id) {
     return d;
 }
 
-function updateMissionIndicator() {
-    const indicator = document.getElementById('mission-indicator');
-    if (currentCharacter && currentGoal > 0) {
-        indicator.textContent = `${CHARACTERS[currentCharacter].name}: ${collectedGold}/${currentGoal} GOLD`;
-    } else if (currentCharacter) {
-        indicator.textContent = `${CHARACTERS[currentCharacter].name}`;
-    }
-}
-
 // --- SPIN SYSTEM ---
 function startSpin() {
     if (coins < 5 || busy || !missionStarted) return;
     busy = true;
     
+    // Hide spin button immediately
+    const spinBtn = document.getElementById('spin-btn');
+    spinBtn.style.display = 'none';
+    
     // Reset UI
-    document.getElementById('spin-btn').classList.add('hidden-btn');
     document.getElementById('result-panel').classList.add('hidden');
     document.querySelectorAll('.symbol').forEach(s => s.classList.remove('winning-symbol'));
     
-    // Deduct spin cost from coins
+    // Deduct spin cost
     coins -= 5;
     updateUI();
-    playEnhancedSound('spin');
+    playSound('spin');
     
     // Start all reels spinning
     for (let i = 0; i < 3; i++) {
@@ -617,7 +543,7 @@ function startSpin() {
 function stopReel(i) {
     if (!isSpinning[i]) return;
     
-    playEnhancedSound('click');
+    playSound('click');
     isSpinning[i] = false;
     
     const strip = document.getElementById(`strip-${i}`);
@@ -642,17 +568,19 @@ function stopReel(i) {
     }
 }
 
-// --- ENHANCED WIN DETECTION ---
+// --- WIN DETECTION (ALL POSSIBLE MATCHES) ---
 function checkResult() {
     let lines = [];
     const g = grid;
     
-    // Horizontal lines (middle row is payline)
-    if (g[0][1] === g[1][1] && g[1][1] === g[2][1]) {
-        lines.push({type: 'h', row: 1, symbol: g[0][1]});
+    // Check ALL horizontal lines (3 rows)
+    for (let row = 0; row < 3; row++) {
+        if (g[0][row] === g[1][row] && g[1][row] === g[2][row]) {
+            lines.push({type: 'h', row: row, symbol: g[0][row]});
+        }
     }
     
-    // Vertical lines
+    // Check ALL vertical lines (3 columns)
     for (let col = 0; col < 3; col++) {
         if (g[col][0] === g[col][1] && g[col][1] === g[col][2]) {
             lines.push({type: 'v', col: col, symbol: g[col][0]});
@@ -689,7 +617,6 @@ function highlightLine(line) {
         
         if (target) {
             target.classList.add('winning-symbol');
-            createEnhancedParticles(5, target, '#ff0033');
         }
     }
 }
@@ -729,11 +656,11 @@ function finalize(lines) {
             type.textContent = "ULTRA WIN!";
             totalGold = Math.floor(totalGold * 1.5);
             winType = 'ultra';
-            playEnhancedSound('big-win');
+            playSound('big-win');
         } else {
             type.textContent = "VICTORY!";
             winType = 'normal';
-            playEnhancedSound('win');
+            playSound('win');
         }
         
         // Round gold to nearest 5
@@ -755,9 +682,8 @@ function finalize(lines) {
         collectedGold += finalGold;
         
         updateUI();
-        updateMissionIndicator();
+        updateStats();
         updateMissionProgress();
-        updateCollectedGoldDisplay();
         
         // Check if goal reached
         if (collectedGold >= currentGoal) {
@@ -773,7 +699,7 @@ function finalize(lines) {
         effect.textContent = "Better luck next time!";
         effect.style.color = '#ff6666';
         
-        playEnhancedSound('lose');
+        playSound('lose');
         
         // Check if out of coins
         if (coins < 5) {
@@ -784,17 +710,18 @@ function finalize(lines) {
         }
     }
     
-    // Reset for next spin
+    // Show spin button after 2 seconds if can spin
     setTimeout(() => {
         busy = false;
+        const spinBtn = document.getElementById('spin-btn');
         if (coins >= 5 && missionStarted) {
-            document.getElementById('spin-btn').classList.remove('hidden-btn');
+            spinBtn.style.display = 'flex';
         }
-    }, 2500);
+    }, 2000);
 }
 
 function missionFailed() {
-    // Calculate points lost for failure (10-20 points)
+    // Calculate points lost
     const pointsLost = Math.min(20, Math.max(10, Math.floor(currentGoal / 5)));
     const oldPoints = points;
     points = Math.max(0, points - pointsLost);
@@ -812,7 +739,7 @@ function missionFailed() {
     document.getElementById('mission-failed-message').textContent = 
         `${char.emoji} ${char.name}: "${randomFailure}"`;
     document.getElementById('mission-failed-details').textContent = 
-        `Collected: ${collectedGold} gold | Needed: ${currentGoal} gold | Total: ${coins} gold`;
+        `Collected: ${collectedGold} gold | Needed: ${currentGoal} gold`;
     
     const rankChangeElement = document.getElementById('failed-rank-change');
     rankChangeElement.textContent = `-${pointsLost} POINTS`;
@@ -820,71 +747,18 @@ function missionFailed() {
     document.getElementById('game-view').classList.add('hidden');
     document.getElementById('mission-failed-panel').classList.remove('hidden');
     
-    playEnhancedSound('mission-fail');
-}
-
-// --- ENHANCED PARTICLE SYSTEM ---
-function createEnhancedParticles(count, element, color = '#ff0033') {
-    const particles = document.querySelector('.floating-particles');
-    if (!particles) return;
-    
-    const rect = element.getBoundingClientRect();
-    
-    for (let i = 0; i < count; i++) {
-        const particle = document.createElement('div');
-        particle.className = 'particle';
-        particle.style.left = (rect.left + rect.width/2) + 'px';
-        particle.style.top = (rect.top + rect.height/2) + 'px';
-        particle.style.backgroundColor = color;
-        particle.style.boxShadow = `0 0 10px ${color}`;
-        
-        particles.appendChild(particle);
-        
-        // Enhanced particle animation
-        const angle = Math.random() * Math.PI * 2;
-        const speed = 2 + Math.random() * 3;
-        const size = 3 + Math.random() * 4;
-        const duration = 0.5 + Math.random() * 0.5;
-        
-        particle.style.width = `${size}px`;
-        particle.style.height = `${size}px`;
-        
-        particle.animate([
-            { 
-                transform: 'translate(0,0) scale(1) rotate(0deg)', 
-                opacity: 1 
-            },
-            { 
-                transform: `translate(${Math.cos(angle) * speed * 100}px, ${Math.sin(angle) * speed * 100}px) scale(0) rotate(${360}deg)`, 
-                opacity: 0 
-            }
-        ], {
-            duration: duration * 1000,
-            easing: 'cubic-bezier(0.2, 0, 0.8, 1)'
-        }).onfinish = () => {
-            if (particle.parentNode) {
-                particle.parentNode.removeChild(particle);
-            }
-        };
-    }
+    playSound('mission-fail');
 }
 
 // --- UI UPDATES ---
 function updateUI() {
-    // Update displays
-    document.getElementById('coins').textContent = coins;
-    
-    // Add bounce animation to coins if they changed
-    const coinsElement = document.getElementById('coins');
-    coinsElement.classList.add('coin-bounce');
-    setTimeout(() => {
-        coinsElement.classList.remove('coin-bounce');
-    }, 500);
+    // Update stats
+    updateStats();
     
     // Update spin button state
     const spinBtn = document.getElementById('spin-btn');
     if (spinBtn) {
-        if (coins < 5 || !missionStarted) {
+        if (coins < 5 || !missionStarted || busy) {
             spinBtn.disabled = true;
             spinBtn.style.opacity = '0.5';
         } else {
@@ -896,25 +770,21 @@ function updateUI() {
 
 // --- INITIALIZATION ---
 window.onload = function() {
-    // Load saved game
     loadGame();
     updateRankDisplay();
     updateRankProgress();
     
-    // Initialize audio
     soundEnabled = true;
+    initAudio();
     
-    // Add keyboard help
     document.addEventListener('keydown', function(e) {
         if (e.key === 'h' || e.key === 'H') {
             showQuickGuide();
         }
     });
     
-    // Auto-save every 30 seconds
     setInterval(saveGame, 30000);
-    
-    showEnhancedMessage('Welcome to TENCHU: Shadow Mission!', 'info', 2000);
+    showMessage('Welcome to TENCHU: Shadow Mission!', 'info', 2000);
 };
 
 // --- QUICK GUIDE ---
@@ -922,7 +792,7 @@ function showQuickGuide() {
     const guide = document.getElementById('quick-guide');
     if (guide) {
         guide.classList.remove('hidden');
-        playEnhancedSound('click');
+        playSound('click');
     }
 }
 
@@ -930,7 +800,7 @@ function hideQuickGuide() {
     const guide = document.getElementById('quick-guide');
     if (guide) {
         guide.classList.add('hidden');
-        playEnhancedSound('click');
+        playSound('click');
     }
 }
 
@@ -964,12 +834,10 @@ document.addEventListener('keydown', function(e) {
     }
 });
 
-// Prevent right-click
 document.addEventListener('contextmenu', function(e) {
     e.preventDefault();
 });
 
-// Prevent text selection
 document.addEventListener('selectstart', function(e) {
     e.preventDefault();
 });
