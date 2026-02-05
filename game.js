@@ -448,11 +448,14 @@ function completeMission() {
 
 // --- UI FUNCTIONS ---
 function updateStats() {
-    // Update the single line stats display
-    const statsText = document.getElementById('stats-text');
-    if (statsText) {
-        statsText.innerHTML = `GOLD: ${coins} | NEED: ${currentGoal} | COLLECTED: ${collectedGold}`;
-    }
+    // Update two-line stats display
+    const goldElement = document.getElementById('stats-gold');
+    const goalElement = document.getElementById('stats-goal');
+    const collectedElement = document.getElementById('stats-collected');
+    
+    if (goldElement) goldElement.textContent = coins;
+    if (goalElement) goalElement.textContent = currentGoal;
+    if (collectedElement) collectedElement.textContent = collectedGold;
 }
 
 function updateMissionProgress() {
@@ -514,6 +517,7 @@ function createSymbol(id) {
 // --- SPIN SYSTEM ---
 function startSpin() {
     if (coins < 5 || busy || !missionStarted) return;
+    
     busy = true;
     
     // Hide spin button immediately
@@ -603,7 +607,7 @@ function checkResult() {
     }
     
     // Process results
-    finalize(lines);
+    setTimeout(() => finalize(lines), 500);
 }
 
 function highlightLine(line) {
@@ -724,11 +728,14 @@ function finalize(lines) {
         panel.classList.add('hidden');
         panel.style.display = 'none';
         
+        // Reset busy state and show spin button
         busy = false;
         const spinBtn = document.getElementById('spin-btn');
         if (coins >= 5 && missionStarted) {
             spinBtn.style.display = 'flex';
+            spinBtn.disabled = false; // IMPORTANT: Make sure button is clickable
         }
+        updateUI(); // Update button state
     }, 2000);
 }
 
