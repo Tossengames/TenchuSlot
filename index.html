@@ -65,7 +65,7 @@
             
             <!-- Footer info -->
             <div class="menu-footer">
-                <div class="version">v1.5.0</div>
+                <div class="version">v1.6.0</div>
                 <div class="hint">
                     <i class="fas fa-lightbulb"></i> Press ESC to pause during mission
                 </div>
@@ -188,16 +188,34 @@
 
     <!-- Game View -->
     <div id="game-view" class="screen hidden">
-        <!-- Game Header - ONE LINE STATS -->
+        <!-- Game Header - TWO LINE STATS -->
         <div class="game-header">
             <div class="stats-container">
-                <div id="stats-text">GOLD: 0 | NEED: 0 | COLLECTED: 0</div>
-            </div>
-            <div class="mission-progress-container">
-                <div class="progress-track">
-                    <div class="progress-fill" id="mission-progress"></div>
+                <!-- First Line: GOLD and NEED -->
+                <div class="stats-line-1">
+                    <div class="stat-box gold">
+                        <div class="stat-label">GOLD</div>
+                        <div class="stat-value gold-value" id="stats-gold">0</div>
+                    </div>
+                    <div class="stat-box need">
+                        <div class="stat-label">NEED</div>
+                        <div class="stat-value need-value" id="stats-goal">0</div>
+                    </div>
                 </div>
-                <div class="progress-text" id="mission-progress-text">0%</div>
+                
+                <!-- Second Line: COLLECTED and Progress -->
+                <div class="stats-line-2">
+                    <div class="stat-box collected">
+                        <div class="stat-label">COLLECTED</div>
+                        <div class="stat-value collected-value" id="stats-collected">0</div>
+                    </div>
+                    <div class="mission-progress-container">
+                        <div class="progress-track">
+                            <div class="progress-fill" id="mission-progress"></div>
+                        </div>
+                        <div class="progress-text" id="mission-progress-text">0%</div>
+                    </div>
+                </div>
             </div>
         </div>
 
