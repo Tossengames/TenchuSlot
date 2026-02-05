@@ -277,7 +277,10 @@ function resetMissionState() {
     
     // Reset UI elements
     const resultPanel = document.getElementById('result-panel');
-    if (resultPanel) resultPanel.classList.add('hidden');
+    if (resultPanel) {
+        resultPanel.classList.add('hidden');
+        resultPanel.style.display = 'none';
+    }
     
     const spinBtn = document.getElementById('spin-btn');
     if (spinBtn) {
@@ -517,8 +520,12 @@ function startSpin() {
     const spinBtn = document.getElementById('spin-btn');
     spinBtn.style.display = 'none';
     
+    // Hide result panel if visible
+    const resultPanel = document.getElementById('result-panel');
+    resultPanel.classList.add('hidden');
+    resultPanel.style.display = 'none';
+    
     // Reset UI
-    document.getElementById('result-panel').classList.add('hidden');
     document.querySelectorAll('.symbol').forEach(s => s.classList.remove('winning-symbol'));
     
     // Deduct spin cost
@@ -596,7 +603,7 @@ function checkResult() {
     }
     
     // Process results
-    setTimeout(() => finalize(lines), 500);
+    finalize(lines);
 }
 
 function highlightLine(line) {
@@ -627,6 +634,8 @@ function finalize(lines) {
     const cash = document.getElementById('res-coins');
     const effect = document.getElementById('result-effect');
     
+    // Show result panel OVER the spin button
+    panel.style.display = 'flex';
     panel.classList.remove('hidden');
     
     if (lines.length > 0) {
@@ -710,8 +719,11 @@ function finalize(lines) {
         }
     }
     
-    // Show spin button after 2 seconds if can spin
+    // Hide result panel after 2 seconds and show spin button
     setTimeout(() => {
+        panel.classList.add('hidden');
+        panel.style.display = 'none';
+        
         busy = false;
         const spinBtn = document.getElementById('spin-btn');
         if (coins >= 5 && missionStarted) {
