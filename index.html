@@ -23,14 +23,14 @@
     <!-- Main Menu -->
     <div id="main-menu" class="screen">
         <div class="menu-container">
-            <!-- Logo with glow effect -->
+            <!-- Logo -->
             <div class="logo-container">
                 <div class="logo-shine"></div>
                 <h1 class="glitch-title" data-text="TENCHU SHADOW MISSION">TENCHU<br><span class="subtitle">SHADOW MISSION</span></h1>
                 <div class="logo-accent"></div>
             </div>
             
-            <!-- Rank display with modern card -->
+            <!-- Rank display -->
             <div class="rank-card">
                 <div class="rank-card-inner">
                     <div class="rank-icon">
@@ -50,7 +50,7 @@
                 </div>
             </div>
             
-            <!-- Menu buttons with modern design -->
+            <!-- Menu buttons -->
             <div class="menu-btns">
                 <button class="btn-primary" onclick="startMission()">
                     <i class="fas fa-play"></i> START MISSION
@@ -65,7 +65,7 @@
             
             <!-- Footer info -->
             <div class="menu-footer">
-                <div class="version">v1.2.0</div>
+                <div class="version">v1.4.0</div>
                 <div class="hint">
                     <i class="fas fa-lightbulb"></i> Press ESC to pause during mission
                 </div>
@@ -176,17 +176,6 @@
                         <p>Ranks: INITIATE → SHINOBI → ASSASSIN → SHADOW MASTER → GRAND MASTER</p>
                     </div>
                 </div>
-                
-                <div class="rule-section">
-                    <div class="rule-icon">
-                        <i class="fas fa-save"></i>
-                    </div>
-                    <div class="rule-text">
-                        <h3>SAVING</h3>
-                        <p>Your rank and points are saved automatically.</p>
-                        <p>Progress is stored in your browser.</p>
-                    </div>
-                </div>
             </div>
             
             <div class="info-buttons">
@@ -199,46 +188,22 @@
 
     <!-- Game View -->
     <div id="game-view" class="screen hidden">
-        <!-- Game Header -->
+        <!-- Game Header - ONE LINE STATS -->
         <div class="game-header">
-            <div class="header-left">
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-coins"></i>
-                    </div>
-                    <div class="stat-content">
-                        <div class="stat-label">GOLD</div>
-                        <div class="stat-value" id="coins">0</div>
-                    </div>
-                    <div class="stat-glow"></div>
-                </div>
+            <div class="stats-container">
+                <div id="stats-text">GOLD: 0 | NEED: 0 | COLLECTED: 0</div>
             </div>
-            
-            <div class="header-center">
-                <div class="mission-indicator" id="mission-indicator">
-                    <div class="mission-glow"></div>
-                    <div class="mission-text">MISSION ACTIVE</div>
-                    <div class="mission-progress">
-                        <div class="progress-track">
-                            <div class="progress-fill" id="mission-progress"></div>
-                        </div>
-                        <div class="progress-text" id="mission-progress-text">0%</div>
-                    </div>
+            <div class="mission-progress-container">
+                <div class="progress-track">
+                    <div class="progress-fill" id="mission-progress"></div>
                 </div>
+                <div class="progress-text" id="mission-progress-text">0%</div>
             </div>
-            
-            <div class="header-right">
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-crosshairs"></i>
-                    </div>
-                    <div class="stat-content">
-                        <div class="stat-label">COLLECTED</div>
-                        <div class="stat-value" id="collected-gold">0</div>
-                    </div>
-                    <div class="stat-glow"></div>
-                </div>
-            </div>
+        </div>
+
+        <!-- Feedback Panel -->
+        <div id="feedback-panel" class="feedback-panel hidden">
+            <div id="feedback-text"></div>
         </div>
 
         <!-- Slot Machine -->
@@ -299,7 +264,6 @@
                     <i class="fas fa-redo-alt"></i>
                     <span>SPIN (5 GOLD)</span>
                 </div>
-                <div class="spin-effect"></div>
             </button>
             
             <div class="control-buttons">
@@ -308,9 +272,6 @@
                 </button>
                 <button class="btn-control btn-leave" onclick="returnToBase()">
                     <i class="fas fa-door-open"></i> LEAVE
-                </button>
-                <button class="btn-control" onclick="toggleSound()">
-                    <i class="fas fa-volume-up" id="sound-icon"></i>
                 </button>
             </div>
         </div>
@@ -421,8 +382,5 @@
     </div>
 
     <script src="game.js"></script>
-<button id="encyclopedia-back-btn" onclick="backToMenu()">
-  <i class="fas fa-home"></i> Back to Menu
-</button>
 </body>
 </html>
