@@ -54,17 +54,17 @@ const CHARACTERS = {
         emoji: "👺",
         color: "#33cc66",
         messages: [
-            "The Azuma clan needs gold for情报. Lord Gohda's enemies plot.",
+            "The Azuma clan needs gold for information. Lord Gohda's enemies plot.",
             "My brothers need weapons. The clan must be ready.",
             "The people cry for protection. We must answer."
         ],
         successMessages: [
-            "情报 flows freely. We see the enemy's moves.",
+            "Information flows freely. We see the enemy's moves.",
             "My brothers are armed. The Azuma clan stands ready.",
             "The people find peace. They sleep knowing we watch."
         ],
         failureMessages: [
-            "情报 runs dry. The enemy strikes from shadows.",
+            "Information runs dry. The enemy strikes from shadows.",
             "My brothers fight with dull blades. The clan bleeds.",
             "The people lose hope. They curse our name."
         ]
