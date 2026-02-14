@@ -7,26 +7,26 @@ const SYMBOLS = 6;
 const EMOJIS = ['🥷', '🗡️', '🏮', '👺', '📜', '🏯'];
 const SYMBOL_NAMES = ['Ninja', 'Sword', 'Lantern', 'Oni', 'Scroll', 'Castle'];
 
-// Character database with Tenchu lore
+// Character database with authentic Tenchu lore
 const CHARACTERS = {
     rikimaru: {
         name: "RIKIMARU",
         emoji: "🥷",
         color: "#3366cc",
         messages: [
-            "Lord Gohda's castle needs funds for defense.",
-            "Azuma villagers need supplies for winter.",
-            "Master Tatsumaru's rebellion threatens our lands."
+            "The Azuma clan needs supplies. Our missions require new tools.",
+            "Azuma village must not starve. The people protect our secret.",
+            "Strange ronin gather at the pass. They seek Lord Gohda's head."
         ],
         successMessages: [
-            "Lord Gohda is pleased. The castle is secure.",
-            "The villagers will survive winter thanks to you.",
-            "Your contribution strengthens our position."
+            "The Azuma clan thanks you. Our missions continue.",
+            "Azuma village survives. The people remember.",
+            "The ronin threat is gone. Lord Gohda sleeps safely."
         ],
         failureMessages: [
-            "Lord Gohda is disappointed in your failure.",
-            "The villagers will suffer without supplies.",
-            "The rebellion gains ground due to your failure."
+            "The Azuma clan struggles. Our tools fail us.",
+            "Azuma village suffers. The people who shelter us go hungry.",
+            "The ronin grow bold. Lord Gohda's life is in danger."
         ]
     },
     ayame: {
@@ -34,19 +34,19 @@ const CHARACTERS = {
         emoji: "⚔️",
         color: "#cc3366",
         messages: [
-            "The Crimson Lily Clan needs funding.",
-            "Our wounded sisters need medicine.",
-            "We need resources to track Lord Meiou."
+            "The Azuma sisters need medicine. Our wounded wait.",
+            "Princess Kiku needs protection. Strange men watch the castle.",
+            "Lord Mei-Oh's servants poison the land. We need sacred charms."
         ],
         successMessages: [
-            "The Crimson Lily Clan thanks you.",
-            "Our sisters will recover with this medicine.",
-            "Now we can monitor Lord Meiou's activities."
+            "Our sisters heal. The Azuma clan stands together.",
+            "Princess Kiku is safe. The girl sleeps without fear.",
+            "Lord Mei-Oh's influence fades. The land breathes."
         ],
         failureMessages: [
-            "The Crimson Lily Clan's operations are hindered.",
-            "Our sisters suffer without proper care.",
-            "Lord Meiou moves unchecked."
+            "Our sisters suffer. The Azuma clan weeps.",
+            "Princess Kiku fears the shadows. We failed her.",
+            "Lord Mei-Oh's corruption spreads. Darkness wins."
         ]
     },
     tatsumaru: {
@@ -54,19 +54,19 @@ const CHARACTERS = {
         emoji: "👺",
         color: "#33cc66",
         messages: [
-            "The rebellion needs funding to continue.",
-            "My followers need weapons and supplies.",
-            "Help us liberate the people from oppression."
+            "The Azuma clan needs gold for情报. Lord Gohda's enemies plot.",
+            "My brothers need weapons. The clan must be ready.",
+            "The people cry for protection. We must answer."
         ],
         successMessages: [
-            "The rebellion grows stronger with your help.",
-            "My followers are now properly equipped.",
-            "The people will remember your support."
+            "情报 flows freely. We see the enemy's moves.",
+            "My brothers are armed. The Azuma clan stands ready.",
+            "The people find peace. They sleep knowing we watch."
         ],
         failureMessages: [
-            "The rebellion struggles without funding.",
-            "My followers fight with inadequate weapons.",
-            "The people continue to suffer."
+            "情报 runs dry. The enemy strikes from shadows.",
+            "My brothers fight with dull blades. The clan bleeds.",
+            "The people lose hope. They curse our name."
         ]
     }
 };
