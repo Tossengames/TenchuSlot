@@ -255,6 +255,11 @@ function updateRankProgress() {
     if (rankLevel) rankLevel.textContent = RANKS[currentRank].level;
     if (nextPoints) nextPoints.textContent = nextRankPoints;
 }
+// --- DONATION FUNCTION ---
+function donate() {
+    window.open('https://ko-fi.com/zesan', '_blank');
+    playSound('click');
+}
 
 // --- RESET MISSION STATE ---
 function resetMissionState() {
